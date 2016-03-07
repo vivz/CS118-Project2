@@ -29,8 +29,9 @@ int main(int argc, char *argv[])
   double p_loss, p_corrupt;
   struct sockaddr_in sender_addr, receiver_addr;
   struct packet received_pkt;
-  struct packet last_pkt;
+  struct packet last_pkt, window_pkt;
   last_pkt.type = END_TYPE;
+  window_pkt.type = WINDOW_TYPE;
 
   socklen_t receiver_addr_len = sizeof(receiver_addr);
 
@@ -69,6 +70,7 @@ int main(int argc, char *argv[])
   //constructing the packets
   int packets_per_window = (window_size * 1024) / sizeof(struct packet);
   struct packet packet_array[packets_per_window];
+  window_pkt.data_size = packets_per_window;
 
   while (1) {
     receive_length = recvfrom(socketfd, &received_pkt, 
@@ -85,6 +87,14 @@ int main(int argc, char *argv[])
         printf("Error: file not found\n");
         continue;
       }
+
+      // Before we start sending the file, we let the receiver know our window size
+      n = sendto(socketfd, &window_pkt, sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len);
+      if (n < 0) {
+        printf("Error: sending window packet\n");
+        break;
+      }
+
       for (i=0; i<packets_per_window; i++)
       {
           packet_array[i].type = DATA_TYPE;
