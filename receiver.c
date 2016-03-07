@@ -10,13 +10,15 @@
 #include <netdb.h>      // define structures like hostent
 #include <stdlib.h>
 #include <strings.h>
- 
-#include common.h
+
+#include "common.h"
+
+
 
 void error(char *msg)
 {
     perror(msg);
-    exit(0);
+    exit(1);
 }
 
 int main(int argc, char *argv[])
@@ -29,6 +31,8 @@ int main(int argc, char *argv[])
     socklen_t senderlen = sizeof(sender_addr);  
     struct hostent *server; //contains tons of information, including the server's IP address
     char buffer[256];
+    struct packet filename_pkt;
+    int baselength = sizeof(filename_pkt.type) * 3 + 1;
     
     if (argc < 6) {
        fprintf(stderr,"usage: %s <hostname> <port> <filename> <p(loss)> <p(corruption)>\n", argv[0]);
@@ -56,11 +60,16 @@ int main(int argc, char *argv[])
     sender_addr.sin_family = AF_INET; //initialize server's address
     bcopy((char *)server->h_addr, (char *)&sender_addr.sin_addr.s_addr, server->h_length);
     sender_addr.sin_port = htons(portno);
-        
     
-    memset(buffer,0,256);
-    strcpy(buffer, filename);
-    n = sendto(socketfd, buffer, strlen(buffer), 0, (struct sockaddr *)&sender_addr, senderlen);
+
+    bzero((char *) &filename_pkt, sizeof(filename_pkt));
+    strcpy(filename_pkt.data, filename);
+    filename_pkt.type = FILENAME_TYPE;
+    filename_pkt.size = baselength + strlen(filename);
+
+
+    /*send the file name*/
+    n = sendto(socketfd, &filename_pkt, filename_pkt.size, 0, (struct sockaddr *)&sender_addr, senderlen);
     if (n < 0) 
          error("ERROR writing to filename socket");
     

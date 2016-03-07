@@ -1,5 +1,7 @@
 
+
 #define PACKET_DATA_SIZE 256
+#define FILENAME_TYPE 0
 
 struct packet
 {
