@@ -10,6 +10,8 @@
 #include <netdb.h>      // define structures like hostent
 #include <stdlib.h>
 #include <strings.h>
+ 
+#include common.h
 
 void error(char *msg)
 {
