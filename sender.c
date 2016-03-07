@@ -53,19 +53,6 @@ int main(int argc, char *argv[])
   if (bind(sockfd, (struct sockaddr *) &sender_addr, sizeof(sender_addr)) < 0) 
     error("ERROR on binding");
 
-  long file_size;
-
-  int output_buffer_size = 100;
-  char output_buffer[output_buffer_size];
-  int input_buffer_size = 1024;
-
-  char file_name[100];
-  char file_extension[10];
-
-  listen(sockfd,5);  //5 simultaneous connection at most
-
-  close(sockfd);
-     
   return 0; 
 }
 
