@@ -30,3 +30,5 @@ rr:
 
 clean:
 	rm sender
+	rm receiver
+	rm *_copy
