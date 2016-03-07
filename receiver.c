@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <strings.h>
  
-#include common.h
+#include "common.h"
 
 void error(char *msg)
 {

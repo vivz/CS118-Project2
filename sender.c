@@ -12,9 +12,7 @@
 #include <sys/wait.h>   /* for the waitpid() system call */
 #include <signal.h> /* signal name macros, and the kill() prototype */
 
-#include common.h
-
-#define BUFSIZE 2048
+#include "common.h"
 
 void error(char *msg)
 {
@@ -28,8 +26,8 @@ int main(int argc, char *argv[])
   int receive_length;
   double p_loss, p_corrupt;
   struct sockaddr_in sender_addr, receiver_addr;
+  struct packet received_packet;
   socklen_t receiver_addr_len = sizeof(receiver_addr);
-  unsigned char buffer[2048];
 
   if (argc < 5) {
      fprintf(stderr,"Error: Not enough arguments\n");
@@ -61,10 +59,23 @@ int main(int argc, char *argv[])
   printf("waiting on port %d\n", portno);
 
   while (1) {
-    receive_length = recvfrom(socketfd, buffer, 
-      BUFSIZE, 0, (struct sockaddr *)&receiver_addr, &receiver_addr_len);
-    printf("received message: %s\n", buffer);
+    receive_length = recvfrom(socketfd, &received_packet, 
+      sizeof(received_packet), 
+      0, (struct sockaddr *)&receiver_addr, 
+      &receiver_addr_len);
+
+    if (received_packet.type == FILENAME_TYPE) {
+      char* filename = received_packet.data;
+      printf("received filename packet for: %s\n", filename);
+    }
+
+    else {
+      printf("received a packet\n");
+    }
+
   }
+
+
 
   return 0; 
 }
