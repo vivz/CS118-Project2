@@ -91,9 +91,6 @@ int main(int argc, char *argv[])
     
     printf("Requested file %s\n", filename);
 
-    //create a buffer for out-of-order packets
-
-
     while(1){
       //receiving a packet
       receive_length = recvfrom(socketfd, &received_pkt, sizeof(received_pkt), 0, (struct sockaddr *)&sender_addr, &senderlen);
@@ -104,12 +101,13 @@ int main(int argc, char *argv[])
       }
 
       if(received_pkt.type == END_TYPE) {
+        printf("%d) Received END packet\n", execution_no++);
         break;
       }
 
       else if(received_pkt.type == WINDOW_SIZE_TYPE){
         window_size = received_pkt.data_size;
-        printf("received window size: %d\n", window_size);
+        printf("%d) Received WINDOW_SIZE packet, Window Size: %d\n", execution_no++, window_size);
         //initializing packet buffer array
         packets_per_window = (window_size * 1024) / sizeof(struct packet);
         packet_buffer = (struct packet*) malloc(packets_per_window * sizeof(struct packet));
@@ -126,16 +124,20 @@ int main(int argc, char *argv[])
         if (fp == NULL) {
             char* new_filename = strcat(filename, "_copy");
             fp = fopen(new_filename, "wb");
+            printf("%d) Created %s\n", execution_no++, new_filename);
         }
 
-        printf("data received: %s\n", received_pkt.data);
-        printf("data size: %d\n", received_pkt.data_size);
-        printf("ftell is %d, sequence is %d\n", ftell(fp), received_pkt.sequence);
+        printf("%d) Received DATA packet, Size: %d, Sequence: %ld\n", 
+            execution_no++, received_pkt.data_size, received_pkt.sequence);
+        printf("Data: \n%s\n", received_pkt.data);
+        printf("ftell is %ld\n", ftell(fp));
 
         //if the packet is in order
         if(ftell(fp) == received_pkt.sequence){
             //writing incoming packet to the file
             n = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
+            printf("%d) Wrote DATA packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
+
             if(n < 0)
             {
                 printf("Error writing to the file\n");
@@ -152,6 +154,9 @@ int main(int argc, char *argv[])
                     {
                         printf("Failed writing buffered packet to the file\n");
                         break;
+                    }
+                    else {
+                        printf("%d) Wrote DATA packet, Sequence: %ld\n", execution_no++, packet_buffer[i].sequence);
                     }
                     //fill the next expected spot with a place-holder 
                     packet_buffer[i].type = PLACE_HOLDER_TYPE;
@@ -188,6 +193,9 @@ int main(int argc, char *argv[])
         {
             printf("ERROR writing to acknowledgement socket");
             continue;
+        }
+        else {
+            printf("%d) Sent ACK packet, Sequence: %ld\n", execution_no++, ack_pkt.sequence);
         }
         //if the packet isn't expected, don't send ACK
         label: ;

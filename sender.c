@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
   if (bind(socketfd, (struct sockaddr *) &sender_addr, sizeof(sender_addr)) < 0) 
     error("Error: bind failed");
 
-  printf("waiting on port %d\n", portno);
+  printf("Waiting on port %d\n", portno);
 
   //constructing the packets
   int packets_per_window = (window_size * 1024) / sizeof(struct packet);
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     if (received_pkt.type == FILENAME_TYPE) {
       char* filename = received_pkt.data;
-      printf("%d) Received filename packet for: %s\n", execution_no++, filename);
+      printf("%d) Received FILENAME packet, Filename: %s\n", execution_no++, filename);
       file_p = fopen(filename, "r");
 
       if (file_p == NULL) {
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
       }
 
       else {
-        printf("%d) Sent packet containing window size to receiver\n", execution_no++);
+        printf("%d) Sent WINDOW_SIZE packet, Window Size: %d\n", execution_no++, packets_per_window);
       }
 
       for (i=0; i<packets_per_window; i++)
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
             break;
           }
           else {
-            printf("%d) Sent data packet with seq number: %d\n", execution_no++, packet_array[i].sequence);
+            printf("%d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
             printPacket(packet_array[i]);
           }
 
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
     else {
 
       if (received_pkt.type == ACK_TYPE) {
-        printf("%d) Received ACK with sequence: %d\n", execution_no++, received_pkt.sequence);
+        printf("%d) Received ACK packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
       }
       else {
         printf("%d) received a packet\n", execution_no++);
