@@ -26,6 +26,12 @@ runsender:
 runreceiver:
 	./receiver_dir/receiver $(receiver_args)
 
+rs:
+	make runsender
+
+rr:
+	make runreceiver
+
 clean:
 	rm sender
 	rm -rf receiver_dir
