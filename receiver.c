@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     int socketfd; 
     int portno, n;
     int receive_length;
-    int window_size;
+    int window_size, packets_per_window;
     char *filename, *hostname;
     double p_loss, p_corrupt;
     struct sockaddr_in sender_addr;
@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
     struct hostent *server; 
     char buffer[256];
     struct packet filename_pkt, received_pkt, ack_pkt;
+    struct packet *packet_buffer;
     int baselength = sizeof(filename_pkt.type) * 3 + 1;
     ack_pkt.type = ACK_TYPE;
     
@@ -88,8 +89,6 @@ int main(int argc, char *argv[])
     fp = fopen(new_filename, "wb");
 
     //create a buffer for out-of-order packets
-    int packets_per_window = (window_size * 1024) / sizeof(struct packet);
-    struct packet packet_array[packets_per_window];
 
 
     while(1){
@@ -98,7 +97,7 @@ int main(int argc, char *argv[])
       if (receive_length < 0)
       {
         printf("Error receiving a packet\n");
-        break;
+        continue;
       }
 
       if(received_pkt.type == END_TYPE) {
@@ -108,7 +107,9 @@ int main(int argc, char *argv[])
       if(received_pkt.type == WINDOW_SIZE_TYPE){
         window_size = received_pkt.data_size;
         printf("received window size: %d\n", window_size);
-        break;
+        packets_per_window = (window_size * 1024) / sizeof(struct packet);
+        packet_buffer = (struct packet*) malloc(packets_per_window * sizeof(struct packet));
+        continue;
       }
 
       printf("data received: %s\n", received_pkt.data);
@@ -119,7 +120,7 @@ int main(int argc, char *argv[])
       if(n < 0)
       {
         printf("Error writing to the file\n");
-        break;
+        continue;
       }
 
       //send acknowledgement packet
