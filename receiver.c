@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
                         break;
                     }
                     else {
-                        printf("%d) Wrote DATA packet, Sequence: %ld\n", execution_no++, packet_buffer[i].sequence);
+                        printf("%d) Wrote DATA packet from the buffer, Sequence: %ld\n", execution_no++, packet_buffer[i].sequence);
                     }
                     //TODO: wrap around sequence number when it exceeds
                     //fill the next expected spot with a place-holder 
@@ -180,6 +180,7 @@ int main(int argc, char *argv[])
         //if it's out of order, put it in the buffer
         else
         {
+            printf("received an out of order packet\n");
             for(i = 0; i != packets_per_window; i++)
             {
                 if(received_pkt.sequence == packet_buffer[i].sequence)
