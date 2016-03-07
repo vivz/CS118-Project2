@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
         
     
     memset(buffer,0,256);
+    strcpy(buffer, filename);
     n = sendto(socketfd, buffer, strlen(buffer), 0, (struct sockaddr *)&sender_addr, senderlen);
     if (n < 0) 
          error("ERROR writing to filename socket");
