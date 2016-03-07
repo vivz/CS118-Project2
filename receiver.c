@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
     int socketfd; 
     int portno, n;
     int receive_length;
+    int buffer_full = 0, i = 0, end = 0;
     int window_size, packets_per_window;
     char *filename, *hostname;
     double p_loss, p_corrupt;
@@ -37,6 +38,7 @@ int main(int argc, char *argv[])
     char buffer[256];
     struct packet filename_pkt, received_pkt, ack_pkt;
     struct packet *packet_buffer;
+    int buffer_base = 0, buffer_tail = 0;
     int baselength = sizeof(filename_pkt.type) * 3 + 1;
     ack_pkt.type = ACK_TYPE;
     
@@ -107,8 +109,15 @@ int main(int argc, char *argv[])
       else if(received_pkt.type == WINDOW_SIZE_TYPE){
         window_size = received_pkt.data_size;
         printf("received window size: %d\n", window_size);
+
+        //initializing packet buffer array
         packets_per_window = (window_size * 1024) / sizeof(struct packet);
         packet_buffer = (struct packet*) malloc(packets_per_window * sizeof(struct packet));
+        for(i = 0; i < packets_per_window; i++)
+        {
+            packet_buffer[i].type = PLACE_HOLDER_TYPE;
+            packet_buffer[i].sequence = i * sizeof(struct packet);
+        }
         continue;
       }
 
@@ -116,13 +125,49 @@ int main(int argc, char *argv[])
         printf("data received: %s\n", received_pkt.data);
         printf("data size: %d\n", received_pkt.data_size);
 
-        //writing incoming packet to the file
-        n = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
-        if(n < 0)
-        {
-        printf("Error writing to the file\n");
-        continue;
+        
+        printf("ftell is %d, sequence is %d\n", ftell(fp), received_pkt.sequence);
+
+        //if the packet is in order
+        if(ftell(fp) == received_pkt.sequence){
+            //writing incoming packet to the file
+            n = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
+            if(n < 0)
+            {
+                printf("Error writing to the file\n");
+                continue;
+            }
+            /*
+            if(buffer_full || buffer_base!= buffer_tail)
+            { 
+                //read all in-order packet in the buffer
+               
+                while(buffer_base != buffer_tail)
+                {
+                    if(ftell(fp) == packet_buffer[buffer_base].sequence)
+                        n = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
+                        buffer_base++;
+                        if(buffer_base == packets_per_window)
+                            buffer_base = 0;
+                        //send acknowledge
+                }
+
+                buffer_full = 0; 
+            }*/
         }
+        //if it's out of order, put it in the buffer
+        /*
+        else if (!buffer_full)
+        {
+            packet_buffer[buffer_tail] = received_pkt;
+            buffer_tail++;
+            
+            if(buffer_tail == buffer_base)
+            {
+                buffer_full = 1;
+            }
+        }*/
+
         //send acknowledgement packet
         ack_pkt.sequence = received_pkt.sequence;
         n = sendto(socketfd, &ack_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen);

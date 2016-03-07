@@ -4,13 +4,14 @@
 #define DATA_TYPE 2
 #define END_TYPE 3
 #define WINDOW_SIZE_TYPE 4
+#define PLACE_HOLDER_TYPE 5
 
 
 struct packet
 {
 	int type;
 	int data_size;
-	int sequence;
+	long sequence;
 	char data[PACKET_DATA_SIZE];
 };
 
