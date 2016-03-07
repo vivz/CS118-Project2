@@ -12,6 +12,8 @@
 #include <sys/wait.h>   /* for the waitpid() system call */
 #include <signal.h> /* signal name macros, and the kill() prototype */
 
+#include common.h
+
 #define BUFSIZE 2048
 
 void error(char *msg)
