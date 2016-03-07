@@ -3,6 +3,7 @@
 #define ACK_TYPE 1
 #define DATA_TYPE 2
 #define END_TYPE 3
+#define WINDOW_SIZE_TYPE 4
 
 
 struct packet

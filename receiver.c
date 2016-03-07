@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
     int socketfd; 
     int portno, n;
     int receive_length;
+    int window_size;
     char *filename, *hostname;
     double p_loss, p_corrupt;
     struct sockaddr_in sender_addr;
@@ -34,8 +35,9 @@ int main(int argc, char *argv[])
     // contains tons of information, including the server's IP address
     struct hostent *server; 
     char buffer[256];
-    struct packet filename_pkt, received_pkt;
+    struct packet filename_pkt, received_pkt, ack_pkt;
     int baselength = sizeof(filename_pkt.type) * 3 + 1;
+    ack_pkt.type = ACK_TYPE;
     
     if (argc < 6) {
        fprintf(stderr,"usage: %s <hostname> <port> <filename> <p(loss)> <p(corruption)>\n", argv[0]);
@@ -85,31 +87,48 @@ int main(int argc, char *argv[])
     char* new_filename = strcat(filename, "_copy");
     fp = fopen(new_filename, "wb");
 
+    //create a buffer for out-of-order packets
+    int packets_per_window = (window_size * 1024) / sizeof(struct packet);
+    struct packet packet_array[packets_per_window];
+
 
     while(1){
-
+      //receiving a packet
       receive_length = recvfrom(socketfd, &received_pkt, sizeof(received_pkt), 0, (struct sockaddr *)&sender_addr, &senderlen);
       if (receive_length < 0)
       {
         printf("Error receiving a packet\n");
         break;
-      }   
-      else
-      {
-        printf("data received: %s\n", received_pkt.data);
-        printf("data size: %d\n", received_pkt.data_size);
       }
 
       if(received_pkt.type == END_TYPE) {
         break;
       }
 
+      if(received_pkt.type == WINDOW_SIZE_TYPE){
+        window_size = received_pkt.data_size;
+        break;
+      }
+
+      printf("data received: %s\n", received_pkt.data);
+      printf("data size: %d\n", received_pkt.data_size);
+     
+      //writing incoming packet to the file
       n = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
       if(n < 0)
       {
         printf("Error writing to the file\n");
         break;
       }
+
+      //send acknowledgement packet
+      ack_pkt.sequence = received_pkt.sequence;
+      n = sendto(socketfd, &ack_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen);
+      if (n < 0) 
+         error("ERROR writing to acknowledgement socket");
+    
+
+
 
     }
 
