@@ -180,18 +180,21 @@ int main(int argc, char *argv[])
         //if it's out of order, put it in the buffer
         else
         {
-            printf("received an out of order packet\n");
+            printf("this packet is out of order\n");
             for(i = 0; i != packets_per_window; i++)
             {
                 if(received_pkt.sequence == packet_buffer[i].sequence)
                 {
                     packet_buffer[i] = received_pkt; 
-                    goto label;
+                    goto send_ack;
                 }
             }
             //if this packet isn't expected, we just drop it   
+            goto no_ack;
         }
+
         //send acknowledgement packet
+        send_ack:;
         ack_pkt.sequence = received_pkt.sequence;
         if(sendto(socketfd, &ack_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen) < 0)
         {
@@ -202,7 +205,7 @@ int main(int argc, char *argv[])
             printf("%2d) Sent ACK packet, Sequence: %ld\n", execution_no++, ack_pkt.sequence);
         }
         //if the packet isn't expected, don't send ACK
-        label: ;
+        no_ack:;
       }
      
     }

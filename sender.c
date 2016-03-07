@@ -140,7 +140,6 @@ int main(int argc, char *argv[])
             printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
             if (PRINT_DATA)
             printf("Data: \n%s\n", packet_array[i].data);
-            
         }
       }
 
