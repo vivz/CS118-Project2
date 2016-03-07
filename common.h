@@ -14,7 +14,7 @@ struct packet
 
 void printPacket(struct packet p)
 {
-    printf("sequence:%d, data: %s\n", p.sequence, p.data);
+    printf("sequence:%d, data_size: %d, data: %s\n", p.sequence, p.data_size, p.data);
 }
 
 void printPacketArray(struct packet pa[], int size)

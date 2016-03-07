@@ -85,8 +85,8 @@ int main(int argc, char *argv[])
     char* new_filename = strcat(filename, "_copy");
     fp = fopen(new_filename, "wb");
 
-
-    while(1){
+    for (int i = 0; i < 1; i++){
+    // while(1){
       receive_length = recvfrom(socketfd, &received_pkt, sizeof(received_pkt), 0, (struct sockaddr *)&sender_addr, &senderlen);
       if (receive_length < 0)
       {
@@ -96,7 +96,9 @@ int main(int argc, char *argv[])
       else
       {
         printf("data received: %s\n", received_pkt.data);
+        printf("data size: %d\n", received_pkt.data_size);
       }
+
       n = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
       if(n < 0)
       {
