@@ -20,10 +20,24 @@ void error(char *msg)
     exit(1);
 }
 
+void printPacket(struct packet p)
+{
+    printf("sequence:%d, data: %s\n", p.sequence, p.data);
+}
+
+void printPacketArray(struct packet pa[], int size)
+{
+    for(int i = 0; i < size; i++)
+    {
+        printPacket(pa[i]);
+    }
+}
 int main(int argc, char *argv[])
 {
   int socketfd, newsocketfd, portno, pid, window_size;
   int receive_length;
+  int send_base = 0, i = 0;
+  int send_tail = 0;
   double p_loss, p_corrupt;
   struct sockaddr_in sender_addr, receiver_addr;
   struct packet received_pkt;
@@ -43,9 +57,6 @@ int main(int argc, char *argv[])
   p_corrupt = atof(argv[4]);
 
 
-  int packets_per_window = (window_size * 1024) / sizeof(struct packet);
-  printf("packets per window %d\n", packets_per_window);
-
   //create socket
   socketfd = socket(AF_INET, SOCK_DGRAM, 0); 
   if (socketfd < 0) 
@@ -64,6 +75,10 @@ int main(int argc, char *argv[])
 
   printf("waiting on port %d\n", portno);
 
+  //constructing the packets
+  int packets_per_window = (window_size * 1024) / sizeof(struct packet);
+  struct packet packet_array[packets_per_window];
+
   while (1) {
     receive_length = recvfrom(socketfd, &received_pkt, 
       sizeof(received_pkt), 
@@ -79,8 +94,15 @@ int main(int argc, char *argv[])
         printf("Error: file not found\n");
         continue;
       }
-
-
+      for (i=0; i<packets_per_window; i++)
+      {
+          packet_array[i].type = DATA_TYPE;
+          packet_array[i].sequence =  ftell(file_p);
+          packet_array[i].data_size = fread(packet_array[i].data, PACKET_DATA_SIZE, 1, file_p);
+          send_tail++;
+          if(feof(file_p))
+            break;
+      }
 
       // not sure if this goes here
       // fclose(file_p);

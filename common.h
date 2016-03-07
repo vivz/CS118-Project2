@@ -7,7 +7,7 @@
 struct packet
 {
 	int type;
-	int size;
+	int data_size;
 	int sequence;
 	char data[PACKET_DATA_SIZE];
 };

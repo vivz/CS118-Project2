@@ -72,11 +72,11 @@ int main(int argc, char *argv[])
     memset((char *) &filename_pkt, 0, sizeof(filename_pkt));
     strcpy(filename_pkt.data, filename);
     filename_pkt.type = FILENAME_TYPE;
-    filename_pkt.size = baselength + strlen(filename);
+    filename_pkt.data_size = strlen(filename); 
 
 
     // send the file name
-    n = sendto(socketfd, &filename_pkt, filename_pkt.size, 0, (struct sockaddr *)&sender_addr, senderlen);
+    n = sendto(socketfd, &filename_pkt,  sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen);
     if (n < 0) 
          error("ERROR writing to filename socket");
     
