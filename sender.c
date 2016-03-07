@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
   struct packet received_pkt;
   struct packet last_pkt, window_pkt;
   last_pkt.type = END_TYPE;
-  window_pkt.type = WINDOW_TYPE;
+  window_pkt.type = WINDOW_SIZE_TYPE;
 
   socklen_t receiver_addr_len = sizeof(receiver_addr);
 

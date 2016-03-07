@@ -107,6 +107,7 @@ int main(int argc, char *argv[])
 
       if(received_pkt.type == WINDOW_SIZE_TYPE){
         window_size = received_pkt.data_size;
+        printf("received window size: %d\n", window_size);
         break;
       }
 
