@@ -21,21 +21,28 @@ void error(char *msg)
 
 int main(int argc, char *argv[])
 {
-  int sockfd, newsockfd, portno, pid;
+  int sockfd, newsockfd, portno, pid, window_size;
+  double p_loss, p_corrupt;
   socklen_t clilen;
   struct sockaddr_in serv_addr, cli_addr;
 
-  if (argc < 2) {
-     fprintf(stderr,"ERROR, no port provided\n");
+  if (argc < 5) {
+     fprintf(stderr,"Error: Not enough arguments\n");
+     fprintf(stderr,"Run with arguments: ./sender <port number> <window size> <P(loss)> <P(corruption)>\n");
      exit(1);
   }
+
+  portno = atoi(argv[1]);
+  window_size = atoi(argv[2]);
+  p_loss = atof(argv[3]);
+  p_corrupt = atof(argv[4]);
 
   sockfd = socket(AF_INET, SOCK_DGRAM, 0); //create socket
   if (sockfd < 0) 
     error("ERROR opening socket");
+
   memset((char *) &serv_addr, 0, sizeof(serv_addr));    //reset memory
   //fill in address info
-  portno = atoi(argv[1]);
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
   serv_addr.sin_port = htons(portno);
