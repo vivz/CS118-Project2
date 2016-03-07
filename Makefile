@@ -11,13 +11,13 @@ receiver_args = $(host) $(portnum) $(filename) $(p_loss) $(p_corrupt)
 all:
 	gcc -w -o sender sender.c
 	gcc -w -o receiver receiver.c
-	mkdir receiver_dir
+	mkdir -p receiver_dir
 	mv receiver receiver_dir
 
 warning:
 	gcc -o server server.c
 	gcc -o receiver receiver.c
-	mkdir receiver_dir
+	mkdir -p receiver_dir
 	mv receiver receiver_dir
 
 runsender:
