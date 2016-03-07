@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
   int receive_length;
   int send_base = 0, send_tail = 0;
   int i = 0, n = 0;
+  int execution_no = 0;
   double p_loss, p_corrupt;
   struct sockaddr_in sender_addr, receiver_addr;
   struct packet received_pkt;
@@ -80,7 +81,7 @@ int main(int argc, char *argv[])
 
     if (received_pkt.type == FILENAME_TYPE) {
       char* filename = received_pkt.data;
-      printf("received filename packet for: %s\n", filename);
+      printf("%d) Received filename packet for: %s\n", execution_no++, filename);
       file_p = fopen(filename, "r");
 
       if (file_p == NULL) {
@@ -95,6 +96,10 @@ int main(int argc, char *argv[])
         break;
       }
 
+      else {
+        printf("%d) Sent packet containing window size to receiver\n", execution_no++);
+      }
+
       for (i=0; i<packets_per_window; i++)
       {
           packet_array[i].type = DATA_TYPE;
@@ -107,13 +112,22 @@ int main(int argc, char *argv[])
             break;
           }
           else {
-            printf("sent packet:\n");
+            printf("%d) Sent data packet with seq number: %d\n", execution_no++, packet_array[i].sequence);
             printPacket(packet_array[i]);
           }
 
           send_tail++;
           if(feof(file_p)) {
             n = sendto(socketfd, &last_pkt, sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len);
+            if (n < 0) {
+              printf("Error sending end packet.\n");
+              break;
+            }
+            else {
+              printf("%d) Sent end packet.\n", execution_no++);
+              break;
+              //printPacket(packet_array[i]);
+            }
           }
       }
       //printPacketArray(packet_array, send_tail);
@@ -123,7 +137,13 @@ int main(int argc, char *argv[])
       // fclose(file_p);
     }
     else {
-      printf("received a packet\n");
+
+      if (received_pkt.type == ACK_TYPE) {
+        printf("%d) Received ACK with sequence: %d\n", execution_no++, received_pkt.sequence);
+      }
+      else {
+        printf("%d) received a packet\n", execution_no++);
+      }
     }
 
   }
