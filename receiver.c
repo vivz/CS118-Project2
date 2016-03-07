@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
     struct hostent *server; //contains tons of information, including the server's IP address
 
     char buffer[256];
-    if (argc < 3) {
-       fprintf(stderr,"usage %s hostname port\n", argv[0]);
+    if (argc < 6) {
+       fprintf(stderr,"usage: %s <hostname> <port> <filename> <p(loss)> <p(corruption)>\n", argv[0]);
        exit(0);
     }
     

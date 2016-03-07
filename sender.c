@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
   if (argc < 5) {
      fprintf(stderr,"Error: Not enough arguments\n");
-     fprintf(stderr,"Run with arguments: ./sender <port number> <window size> <P(loss)> <P(corruption)>\n");
+     fprintf(stderr,"Usage: %s <port number> <window size> <P(loss)> <P(corruption)>\n", argv[0]);
      exit(1);
   }
 
