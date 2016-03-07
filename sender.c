@@ -74,12 +74,15 @@ int main(int argc, char *argv[])
   window_pkt.data_size = packets_per_window;
 
   while (1) {
+    //receiving a packet
     receive_length = recvfrom(socketfd, &received_pkt, 
       sizeof(received_pkt), 
       0, (struct sockaddr *)&receiver_addr, 
       &receiver_addr_len);
 
+    //begining of a file transmission
     if (received_pkt.type == FILENAME_TYPE) {
+      //find the file
       char* filename = received_pkt.data;
       printf("%2d) Received FILENAME packet, Filename: %s\n", execution_no++, filename);
       file_p = fopen(filename, "r");
@@ -89,15 +92,14 @@ int main(int argc, char *argv[])
         continue;
       }
 
-      // Before we start sending the file, we let the receiver know our window size
-      n = sendto(socketfd, &window_pkt, sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len);
-      if (n < 0) {
-        printf("Error: sending window packet\n");
-        break;
+      // let the receiver know our window size
+      if (sendto(socketfd, &window_pkt, sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
+      {
+          printf("Error: sending window packet\n");
+          continue;
       }
-
       else {
-        printf("%2d) Sent WINDOW_SIZE packet, Window Size: %d\n", execution_no++, packets_per_window);
+          printf("%2d) Sent WINDOW_SIZE packet, Window Size: %d\n", execution_no++, packets_per_window);
       }
 
       //Initialize the first packet array
@@ -108,39 +110,45 @@ int main(int argc, char *argv[])
           packet_array[i].sequence =  ftell(file_p);
           packet_array[i].data_size = fread(packet_array[i].data, 1, PACKET_DATA_SIZE, file_p);
 
-          n = sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len);
-          if (n < 0) {
-            printf("Error writing to socket\n");
-            break;
-          }
-          else {
-            printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
-            if (PRINT_DATA)
-              printf("Data: \n%s\n", packet_array[i].data);
-            //printPacket(packet_array[i]);
-          }
-
-          send_tail++;
-
-          //sending the END_TYPE packet
-          if(feof(file_p)) {
-            n = sendto(socketfd, &last_pkt, sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len);
-            if (n < 0) {
-              printf("Error sending end packet.\n");
-              break;
-            }
-            else {
-              printf("%2d) Sent end packet.\n", execution_no++);
+          //if the file ends even before we fill the inital array
+          if(feof(file_p))
+          {
+              packet_array[i+1] = last_pkt;
               fclose(file_p);
               break;
-              //printPacket(packet_array[i]);
-            }
           }
       }
-      //printPacketArray(packet_array, send_tail);
-
-      // not sure if this goes here
-      // fclose(file_p);
+      int changed = 0; 
+      for( i = 0; i< packets_per_window; i++)
+      {
+        //TODO: update send_base and send_tail
+        //order: 1,2,3,4,6,5,7,8,9,10...
+        if(i == 5)
+          i = 6;
+        else if(i == 6 && changed == 1)
+          continue;
+        else if(i == 7 && changed == 0)
+        {
+          i = 5; changed = 1;
+        }
+        if (sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
+        {
+            printf("Error writing to socket\n");
+            break;
+        }
+        else 
+        {
+            if(packet_array[i].type == END_TYPE)
+            {
+              printf("END_TYPE sent. DONE.\n");
+              break;
+            }
+            printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
+            if (PRINT_DATA)
+            printf("Data: \n%s\n", packet_array[i].data);
+            
+        }
+      }
 
     }  //end of if (received_pkt.type == FILENAME_TYPE)
     else {
