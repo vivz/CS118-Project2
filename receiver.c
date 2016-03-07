@@ -103,9 +103,10 @@ int main(int argc, char *argv[])
 
       if(received_pkt.type == END_TYPE) {
         printf("%2d) Received END packet\n", execution_no++);
+        //TODO: deal with the rest of the packets in the buffer.
+        //TODO: wait untill timeout????
         if(fp!=NULL)
             fclose(fp);
-        //TODO: deal wit the remaining packets in the buffer
         break;
       }
 
