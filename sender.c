@@ -59,13 +59,6 @@ int main(int argc, char *argv[])
   printf("waiting on port %d\n", portno);
 
   while (1) {
-<<<<<<< HEAD
-    printf("waiting on port %d\n", portno);
-    receive_length = recvfrom(socketfd, buffer, 
-      BUFSIZE, 0, (struct sockaddr *)&receiver_addr, &receiver_addr_len);
-    printf("received message: %s\n", buffer);
-
-=======
     receive_length = recvfrom(socketfd, &received_packet, 
       sizeof(received_packet), 
       0, (struct sockaddr *)&receiver_addr, 
@@ -81,9 +74,6 @@ int main(int argc, char *argv[])
     }
 
   }
->>>>>>> 2e6ba31779d4e7609c6f704d297f9ac2b78f4cbc
-
-
 
   return 0; 
 }
