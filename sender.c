@@ -36,11 +36,12 @@ int main(int argc, char *argv[])
 {
   int socketfd, newsocketfd, portno, pid, window_size;
   int receive_length;
-  int send_base = 0, i = 0;
-  int send_tail = 0;
+  int send_base = 0, send_tail = 0;
+  int n = 0, i = 0;
   double p_loss, p_corrupt;
   struct sockaddr_in sender_addr, receiver_addr;
   struct packet received_pkt;
+
   socklen_t receiver_addr_len = sizeof(receiver_addr);
 
   FILE *file_p;
@@ -99,6 +100,9 @@ int main(int argc, char *argv[])
           packet_array[i].type = DATA_TYPE;
           packet_array[i].sequence =  ftell(file_p);
           packet_array[i].data_size = fread(packet_array[i].data, PACKET_DATA_SIZE, 1, file_p);
+          n = sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len);
+          if(n < 0)
+            printf("Error sending a packet.\n");
           send_tail++;
           if(feof(file_p))
             break;

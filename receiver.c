@@ -66,17 +66,15 @@ int main(int argc, char *argv[])
     //initialize server's address
     sender_addr.sin_family = AF_INET; 
     memcpy((char *)server->h_addr, (char *)&sender_addr.sin_addr.s_addr, server->h_length);
-    sender_addr.sin_port = htons(portno);
-    
+    sender_addr.sin_port = htons(portno);   
 
     memset((char *) &filename_pkt, 0, sizeof(filename_pkt));
     strcpy(filename_pkt.data, filename);
     filename_pkt.type = FILENAME_TYPE;
     filename_pkt.data_size = strlen(filename); 
 
-
     // send the file name
-    n = sendto(socketfd, &filename_pkt,  sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen);
+    n = sendto(socketfd, &filename_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen);
     if (n < 0) 
          error("ERROR writing to filename socket");
     
