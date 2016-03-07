@@ -118,19 +118,13 @@ int main(int argc, char *argv[])
               break;
           }
       }
-      int changed = 0; 
-      for( i = 0; i< packets_per_window; i++)
+      int j = 0; 
+      int num_array[20]={0,1,3,4,5,6,2,7,8,9,10,11,12,13,14,15,16,17,18,19};
+      for( j = 0; j< packets_per_window; j++)
       {
         //TODO: update send_base and send_tail
-        //order: 1,2,3,4,6,5,7,8,9,10...
-        if(i == 5)
-          i = 6;
-        else if(i == 6 && changed == 1)
-          continue;
-        else if(i == 7 && changed == 0)
-        {
-          i = 5; changed = 1;
-        }
+        //order: 0,2,3,4,5,6,2,7,8,9,10...
+        i = num_array[j];
         if (sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
         {
             printf("Error writing to socket\n");

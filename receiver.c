@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
                         break;
                     }
                     else {
-                        printf("%2d) Wrote DATA packet from the buffer,, Sequence: %ld\n", execution_no++, packet_buffer[i].sequence);
+                        printf("%2d) Wrote DATA packet from the buffer, Sequence: %ld\n", execution_no++, packet_buffer[i].sequence);
                     }
                     //TODO: wrap around sequence number when it exceeds
                     //fill the next expected spot with a place-holder 
