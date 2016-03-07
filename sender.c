@@ -20,14 +20,17 @@ void error(char *msg)
     exit(1);
 }
 
+
+
 int main(int argc, char *argv[])
 {
   int socketfd, newsocketfd, portno, pid, window_size;
   int receive_length;
   double p_loss, p_corrupt;
   struct sockaddr_in sender_addr, receiver_addr;
-  struct packet received_packet;
+  struct packet received_pkt;
   socklen_t receiver_addr_len = sizeof(receiver_addr);
+  FILE *file_p;
 
   if (argc < 5) {
      fprintf(stderr,"Error: Not enough arguments\n");
@@ -59,16 +62,26 @@ int main(int argc, char *argv[])
   printf("waiting on port %d\n", portno);
 
   while (1) {
-    receive_length = recvfrom(socketfd, &received_packet, 
-      sizeof(received_packet), 
+    receive_length = recvfrom(socketfd, &received_pkt, 
+      sizeof(received_pkt), 
       0, (struct sockaddr *)&receiver_addr, 
       &receiver_addr_len);
 
-    if (received_packet.type == FILENAME_TYPE) {
-      char* filename = received_packet.data;
+    if (received_pkt.type == FILENAME_TYPE) {
+      char* filename = received_pkt.data;
       printf("received filename packet for: %s\n", filename);
-    }
+      file_p = fopen(filename, "r");
 
+      if (file_p == NULL) {
+        printf("Error: file not found\n");
+        continue;
+      }
+
+
+
+      // not sure if this goes here
+      // fclose(file_p);
+    }
     else {
       printf("received a packet\n");
     }
