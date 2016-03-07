@@ -12,6 +12,7 @@
 #include <sys/wait.h>   /* for the waitpid() system call */
 #include <signal.h> /* signal name macros, and the kill() prototype */
 
+#define BUFSIZE 2048
 
 void error(char *msg)
 {
@@ -22,9 +23,11 @@ void error(char *msg)
 int main(int argc, char *argv[])
 {
   int sockfd, newsockfd, portno, pid, window_size;
+  int receive_length;
   double p_loss, p_corrupt;
-  socklen_t clilen;
   struct sockaddr_in sender_addr, receiver_addr;
+  socklen_t receiver_addr_len = sizeof(receiver_addr);
+  unsigned char buffer[2048];
 
   if (argc < 5) {
      fprintf(stderr,"Error: Not enough arguments\n");
@@ -52,6 +55,12 @@ int main(int argc, char *argv[])
 
   if (bind(sockfd, (struct sockaddr *) &sender_addr, sizeof(sender_addr)) < 0) 
     error("ERROR on binding");
+
+  while (1) {
+    printf("waiting on port %d\n", portno);
+    receive_length = recvfrom(sockfd, buffer, 
+      BUFSIZE, 0, (struct sockaddr *)&receiver_addr, &receiver_addr_len);
+  }
 
   return 0; 
 }
