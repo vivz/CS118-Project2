@@ -11,3 +11,16 @@ struct packet
 	int sequence;
 	char data[PACKET_DATA_SIZE];
 };
+
+void printPacket(struct packet p)
+{
+    printf("sequence:%d, data: %s\n", p.sequence, p.data);
+}
+
+void printPacketArray(struct packet pa[], int size)
+{
+    for(int i = 0; i < size; i++)
+    {
+        printPacket(pa[i]);
+    }
+}

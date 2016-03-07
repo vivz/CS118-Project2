@@ -22,17 +22,19 @@ void error(char *msg)
 
 int main(int argc, char *argv[])
 {
-    //Socket descriptor
+    // Socket descriptor
     int socketfd; 
     int portno, n;
+    int receive_length;
     char *filename, *hostname;
     double p_loss, p_corrupt;
     struct sockaddr_in sender_addr;
-    socklen_t senderlen = sizeof(sender_addr);  
-    //contains tons of information, including the server's IP address
+    socklen_t senderlen = sizeof(sender_addr);
+    FILE* fp;
+    // contains tons of information, including the server's IP address
     struct hostent *server; 
     char buffer[256];
-    struct packet filename_pkt;
+    struct packet filename_pkt, received_pkt;
     int baselength = sizeof(filename_pkt.type) * 3 + 1;
     
     if (argc < 6) {
@@ -60,10 +62,10 @@ int main(int argc, char *argv[])
         exit(0);
     }
     
-    //bind the socket to any valid IP address and a specific port
+    // bind the socket to any valid IP address and a specific port
     memset((char *) &sender_addr, 0, sizeof(sender_addr));
 
-    //initialize server's address
+    // initialize server's address
     sender_addr.sin_family = AF_INET; 
     memcpy((char *)server->h_addr, (char *)&sender_addr.sin_addr.s_addr, server->h_length);
     sender_addr.sin_port = htons(portno);   
@@ -79,7 +81,32 @@ int main(int argc, char *argv[])
          error("ERROR writing to filename socket");
     
     printf("Requested file %s\n", filename);
-    
+
+    char* new_filename = strcat(filename, "_copy");
+    fp = fopen(new_filename, "wb");
+
+
+    while(1){
+      receive_length = recvfrom(socketfd, &received_pkt, sizeof(received_pkt), 0, (struct sockaddr *)&sender_addr, &senderlen);
+      if (receive_length < 0)
+      {
+        printf("Error receiving a packet\n");
+        break;
+      }   
+      else
+      {
+        printf("data received: %s\n", received_pkt.data);
+      }
+      n = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
+      if(n < 0)
+      {
+        printf("Error writing to the file\n");
+        break;
+      }
+
+    }
+
+    fclose(fp);
     //close socket
     close(socketfd); 
     

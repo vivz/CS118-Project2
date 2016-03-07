@@ -11,20 +11,16 @@ receiver_args = $(host) $(portnum) $(filename) $(p_loss) $(p_corrupt)
 all:
 	gcc -w -o sender sender.c
 	gcc -w -o receiver receiver.c
-	mkdir -p receiver_dir
-	mv receiver receiver_dir
 
 warning:
 	gcc -o sender sender.c
 	gcc -o receiver receiver.c
-	mkdir -p receiver_dir
-	mv receiver receiver_dir
 
 runsender:
 	./sender $(sender_args)
 
 runreceiver:
-	./receiver_dir/receiver $(receiver_args)
+	./receiver $(receiver_args)
 
 rs:
 	make runsender
@@ -34,4 +30,3 @@ rr:
 
 clean:
 	rm sender
-	rm -rf receiver_dir
