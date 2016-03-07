@@ -65,11 +65,11 @@ int main(int argc, char *argv[])
 
     //initialize server's address
     sender_addr.sin_family = AF_INET; 
-    bcopy((char *)server->h_addr, (char *)&sender_addr.sin_addr.s_addr, server->h_length);
+    memcopy((char *)server->h_addr, (char *)&sender_addr.sin_addr.s_addr, server->h_length);
     sender_addr.sin_port = htons(portno);
     
 
-    bzero((char *) &filename_pkt, sizeof(filename_pkt));
+    memset((char *) &filename_pkt, 0, sizeof(filename_pkt));
     strcpy(filename_pkt.data, filename);
     filename_pkt.type = FILENAME_TYPE;
     filename_pkt.size = baselength + strlen(filename);
