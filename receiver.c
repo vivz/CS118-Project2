@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
         for(i = 0; i < packets_per_window; i++)
         {
             packet_buffer[i].type = PLACE_HOLDER_TYPE;
-            packet_buffer[i].sequence = i * sizeof(struct packet);
+            packet_buffer[i].sequence = i * PACKET_DATA_SIZE;
         }
         continue;
       }
@@ -124,8 +124,6 @@ int main(int argc, char *argv[])
       else if (received_pkt.type == DATA_TYPE) {
         printf("data received: %s\n", received_pkt.data);
         printf("data size: %d\n", received_pkt.data_size);
-
-        
         printf("ftell is %d, sequence is %d\n", ftell(fp), received_pkt.sequence);
 
         //if the packet is in order
