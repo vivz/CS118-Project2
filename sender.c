@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     if (received_pkt.type == FILENAME_TYPE) {
       char* filename = received_pkt.data;
-      printf("%d) Received FILENAME packet, Filename: %s\n", execution_no++, filename);
+      printf("%2d) Received FILENAME packet, Filename: %s\n", execution_no++, filename);
       file_p = fopen(filename, "r");
 
       if (file_p == NULL) {
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
       }
 
       else {
-        printf("%d) Sent WINDOW_SIZE packet, Window Size: %d\n", execution_no++, packets_per_window);
+        printf("%2d) Sent WINDOW_SIZE packet, Window Size: %d\n", execution_no++, packets_per_window);
       }
 
       for (i=0; i<packets_per_window; i++)
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
             break;
           }
           else {
-            printf("%d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
+            printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
             if (PRINT_DATA)
               printf("Data: \n%s\n", packet_array[i].data);
             //printPacket(packet_array[i]);
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
               break;
             }
             else {
-              printf("%d) Sent end packet.\n", execution_no++);
+              printf("%2d) Sent end packet.\n", execution_no++);
               break;
               //printPacket(packet_array[i]);
             }
@@ -142,10 +142,10 @@ int main(int argc, char *argv[])
     else {
 
       if (received_pkt.type == ACK_TYPE) {
-        printf("%d) Received ACK packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
+        printf("%2d) Received ACK packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
       }
       else {
-        printf("%d) received a packet\n", execution_no++);
+        printf("%2d) received a packet\n", execution_no++);
       }
     }
 

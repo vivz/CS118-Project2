@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     if (n < 0) 
         error("ERROR writing to filename socket");
     else {
-        printf("%d) Sent filename packet\n", execution_no++);
+        printf("%2d) Sent filename packet\n", execution_no++);
     }
     
     printf("Requested file %s\n", filename);
@@ -101,14 +101,14 @@ int main(int argc, char *argv[])
       }
 
       if(received_pkt.type == END_TYPE) {
+        printf("%2d) Received END packet\n", execution_no++);
         //TODO: deal wit the remaining packets in the buffer
-        printf("%d) Received END packet\n", execution_no++);
         break;
       }
 
       else if(received_pkt.type == WINDOW_SIZE_TYPE){
         window_size = received_pkt.data_size;
-        printf("%d) Received WINDOW_SIZE packet, Window Size: %d\n", execution_no++, window_size);
+        printf("%2d) Received WINDOW_SIZE packet, Window Size: %d\n", execution_no++, window_size);
         //initializing packet buffer array
         packets_per_window = (window_size * 1024) / sizeof(struct packet);
         packet_buffer = (struct packet*) malloc(packets_per_window * sizeof(struct packet));
@@ -125,20 +125,20 @@ int main(int argc, char *argv[])
         if (fp == NULL) {
             char* new_filename = strcat(filename, "_copy");
             fp = fopen(new_filename, "wb");
-            printf("%d) Created %s\n", execution_no++, new_filename);
+            printf("%2d) Created %s\n", execution_no++, new_filename);
         }
 
-        printf("%d) Received DATA packet, Size: %d, Sequence: %ld\n", 
+        printf("%2d) Received DATA packet, Size: %d, Sequence: %ld\n", 
             execution_no++, received_pkt.data_size, received_pkt.sequence);
         if (PRINT_DATA)
             printf("Data: \n%s\n", received_pkt.data);
-        printf("ftell is %ld\n", ftell(fp));
+        //printf("ftell is %ld\n", ftell(fp));
 
         //if the packet is in order
         if(ftell(fp) == received_pkt.sequence){
             //writing incoming packet to the file
             n = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
-            printf("%d) Wrote DATA packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
+            printf("%2d) Wrote DATA packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
 
             if(n < 0)
             {
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
                         break;
                     }
                     else {
-                        printf("%d) Wrote DATA packet from the buffer, Sequence: %ld\n", execution_no++, packet_buffer[i].sequence);
+                        printf("%2d) Wrote DATA packet from the buffer,, Sequence: %ld\n", execution_no++, packet_buffer[i].sequence);
                     }
                     //TODO: wrap around sequence number when it exceeds
                     //fill the next expected spot with a place-holder 
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
             continue;
         }
         else {
-            printf("%d) Sent ACK packet, Sequence: %ld\n", execution_no++, ack_pkt.sequence);
+            printf("%2d) Sent ACK packet, Sequence: %ld\n", execution_no++, ack_pkt.sequence);
         }
         //if the packet isn't expected, don't send ACK
         label: ;
