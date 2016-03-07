@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
     //initialize server's address
     sender_addr.sin_family = AF_INET; 
-    memcopy((char *)server->h_addr, (char *)&sender_addr.sin_addr.s_addr, server->h_length);
+    memcpy((char *)server->h_addr, (char *)&sender_addr.sin_addr.s_addr, server->h_length);
     sender_addr.sin_port = htons(portno);
     
 
