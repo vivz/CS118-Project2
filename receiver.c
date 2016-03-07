@@ -91,7 +91,8 @@ int main(int argc, char *argv[])
     
     printf("Requested file %s\n", filename);
 
-    while(1){
+    while(1)
+    {
       //receiving a packet
       receive_length = recvfrom(socketfd, &received_pkt, sizeof(received_pkt), 0, (struct sockaddr *)&sender_addr, &senderlen);
       if (receive_length < 0)
@@ -102,11 +103,14 @@ int main(int argc, char *argv[])
 
       if(received_pkt.type == END_TYPE) {
         printf("%2d) Received END packet\n", execution_no++);
+        if(fp!=NULL)
+            fclose(fp);
         //TODO: deal wit the remaining packets in the buffer
         break;
       }
 
-      else if(received_pkt.type == WINDOW_SIZE_TYPE){
+      else if(received_pkt.type == WINDOW_SIZE_TYPE)
+      {
         window_size = received_pkt.data_size;
         printf("%2d) Received WINDOW_SIZE packet, Window Size: %d\n", execution_no++, window_size);
         //initializing packet buffer array
@@ -206,9 +210,9 @@ int main(int argc, char *argv[])
         }
         //if the packet isn't expected, don't send ACK
         no_ack:;
-      }
+      } //end of else if (received_pkt.type == DATA_TYPE)
      
-    }
+    }//end of while 1
 
     fclose(fp);
     //close socket
