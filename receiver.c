@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
       }
 
       if(received_pkt.type == END_TYPE) {
+        //TODO: deal wit the remaining packets in the buffer
         printf("%d) Received END packet\n", execution_no++);
         break;
       }
@@ -159,6 +160,7 @@ int main(int argc, char *argv[])
                     else {
                         printf("%d) Wrote DATA packet, Sequence: %ld\n", execution_no++, packet_buffer[i].sequence);
                     }
+                    //TODO: wrap around sequence number when it exceeds
                     //fill the next expected spot with a place-holder 
                     packet_buffer[i].type = PLACE_HOLDER_TYPE;
                     if( i!= 0)

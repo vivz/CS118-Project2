@@ -102,6 +102,7 @@ int main(int argc, char *argv[])
 
       for (i=0; i<packets_per_window; i++)
       {
+          //TODO: Wrap around sequence number when it exceeds
           packet_array[i].type = DATA_TYPE;
           packet_array[i].sequence =  ftell(file_p);
           packet_array[i].data_size = fread(packet_array[i].data, 1, PACKET_DATA_SIZE, file_p);
