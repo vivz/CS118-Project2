@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     
     if (argc < 6) {
        fprintf(stderr,"usage: %s <hostname> <port> <filename> <p(loss)> <p(corruption)>\n", argv[0]);
-       exit(0);
+       exit(1);
     }
     
     hostname = argv[1];
