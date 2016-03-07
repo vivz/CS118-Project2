@@ -15,7 +15,7 @@ all:
 	mv receiver receiver_dir
 
 warning:
-	gcc -o server server.c
+	gcc -o sender sender.c
 	gcc -o receiver receiver.c
 	mkdir -p receiver_dir
 	mv receiver receiver_dir

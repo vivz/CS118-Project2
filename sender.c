@@ -20,8 +20,6 @@ void error(char *msg)
     exit(1);
 }
 
-
-
 int main(int argc, char *argv[])
 {
   int socketfd, newsocketfd, portno, pid, window_size;
@@ -30,6 +28,7 @@ int main(int argc, char *argv[])
   struct sockaddr_in sender_addr, receiver_addr;
   struct packet received_pkt;
   socklen_t receiver_addr_len = sizeof(receiver_addr);
+
   FILE *file_p;
 
   if (argc < 5) {
@@ -42,6 +41,10 @@ int main(int argc, char *argv[])
   window_size = atoi(argv[2]);
   p_loss = atof(argv[3]);
   p_corrupt = atof(argv[4]);
+
+
+  int packets_per_window = (window_size * 1024) / sizeof(struct packet);
+  printf("packets per window %d\n", packets_per_window);
 
   //create socket
   socketfd = socket(AF_INET, SOCK_DGRAM, 0); 
