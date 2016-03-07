@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
         printf("%2d) Sent WINDOW_SIZE packet, Window Size: %d\n", execution_no++, packets_per_window);
       }
 
+      //Initialize the first packet array
       for (i=0; i<packets_per_window; i++)
       {
           //TODO: Wrap around sequence number when it exceeds
@@ -120,6 +121,8 @@ int main(int argc, char *argv[])
           }
 
           send_tail++;
+
+          //sending the END_TYPE packet
           if(feof(file_p)) {
             n = sendto(socketfd, &last_pkt, sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len);
             if (n < 0) {
@@ -128,6 +131,7 @@ int main(int argc, char *argv[])
             }
             else {
               printf("%2d) Sent end packet.\n", execution_no++);
+              fclose(file_p);
               break;
               //printPacket(packet_array[i]);
             }
@@ -135,10 +139,10 @@ int main(int argc, char *argv[])
       }
       //printPacketArray(packet_array, send_tail);
 
-
       // not sure if this goes here
       // fclose(file_p);
-    }
+
+    }  //end of if (received_pkt.type == FILENAME_TYPE)
     else {
 
       if (received_pkt.type == ACK_TYPE) {
