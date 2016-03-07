@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
   int sockfd, newsockfd, portno, pid, window_size;
   double p_loss, p_corrupt;
   socklen_t clilen;
-  struct sockaddr_in serv_addr, cli_addr;
+  struct sockaddr_in sender_addr, receiver_addr;
 
   if (argc < 5) {
      fprintf(stderr,"Error: Not enough arguments\n");
@@ -37,19 +37,21 @@ int main(int argc, char *argv[])
   p_loss = atof(argv[3]);
   p_corrupt = atof(argv[4]);
 
-  sockfd = socket(AF_INET, SOCK_DGRAM, 0); //create socket
+  //create socket
+  sockfd = socket(AF_INET, SOCK_DGRAM, 0); 
   if (sockfd < 0) 
     error("ERROR opening socket");
+  
+  //reset memory
+  memset((char *) &sender_addr, 0, sizeof(sender_addr));    
 
-  memset((char *) &serv_addr, 0, sizeof(serv_addr));    //reset memory
   //fill in address info
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  serv_addr.sin_port = htons(portno);
+  sender_addr.sin_family = AF_INET;
+  sender_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  sender_addr.sin_port = htons(portno);
 
-  if (bind(sockfd, (struct sockaddr *) &serv_addr,
-          sizeof(serv_addr)) < 0) 
-          error("ERROR on binding");
+  if (bind(sockfd, (struct sockaddr *) &sender_addr, sizeof(sender_addr)) < 0) 
+    error("ERROR on binding");
 
   long file_size;
 

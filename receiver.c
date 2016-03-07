@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     int sockfd; //Socket descriptor
     int portno, n;
     double p_loss, p_corrupt;
-    struct sockaddr_in serv_addr;
+    struct sockaddr_in sender_addr;
     struct hostent *server; //contains tons of information, including the server's IP address
 
     char buffer[256];
@@ -45,12 +45,12 @@ int main(int argc, char *argv[])
         exit(0);
     }
     
-    memset((char *) &serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET; //initialize server's address
-    bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
-    serv_addr.sin_port = htons(portno);
+    memset((char *) &sender_addr, 0, sizeof(sender_addr));
+    sender_addr.sin_family = AF_INET; //initialize server's address
+    bcopy((char *)server->h_addr, (char *)&sender_addr.sin_addr.s_addr, server->h_length);
+    sender_addr.sin_port = htons(portno);
     
-    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) //establish a connection to the server
+    if (connect(sockfd,(struct sockaddr *)&sender_addr,sizeof(sender_addr)) < 0) //establish a connection to the server
         error("ERROR connecting");
     
     printf("Please enter the message: ");
