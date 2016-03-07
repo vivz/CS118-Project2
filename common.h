@@ -6,6 +6,7 @@
 #define WINDOW_SIZE_TYPE 4
 #define PLACE_HOLDER_TYPE 5
 
+#define PRINT_DATA 1
 
 struct packet
 {

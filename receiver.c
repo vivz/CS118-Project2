@@ -129,7 +129,8 @@ int main(int argc, char *argv[])
 
         printf("%d) Received DATA packet, Size: %d, Sequence: %ld\n", 
             execution_no++, received_pkt.data_size, received_pkt.sequence);
-        printf("Data: \n%s\n", received_pkt.data);
+        if (PRINT_DATA)
+            printf("Data: \n%s\n", received_pkt.data);
         printf("ftell is %ld\n", ftell(fp));
 
         //if the packet is in order
