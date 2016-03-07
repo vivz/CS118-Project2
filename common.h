@@ -18,7 +18,21 @@ struct packet
 
 void printPacket(struct packet p)
 {
-    printf("sequence:%ld, data_size: %d, data: \n%s\n", p.sequence, p.data_size, p.data);
+    char* packet_type;
+
+    if (p.type == FILENAME_TYPE) 
+        packet_type = "FILENAME";
+    else if (p.type == ACK_TYPE)
+        packet_type = "ACK";
+    else if (p.type == END_TYPE)
+        packet_type = "END";
+    else if (p.type == WINDOW_SIZE_TYPE)
+        packet_type = "WINDOW_SIZE";
+    else if (p.type == PLACE_HOLDER_TYPE)
+        packet_type = "PLACE_HOLDER";
+    else
+        packet_type = "UNKNOWN";
+    printf("Packet type: %s, Sequence:%ld, Data Size: %d, Data: \n%s\n", packet_type, p.sequence, p.data_size, p.data);
 }
 
 void printPacketArray(struct packet pa[], int size)
