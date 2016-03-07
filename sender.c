@@ -22,7 +22,7 @@ void error(char *msg)
 
 int main(int argc, char *argv[])
 {
-  int sockfd, newsockfd, portno, pid, window_size;
+  int socketfd, newsocketfd, portno, pid, window_size;
   int receive_length;
   double p_loss, p_corrupt;
   struct sockaddr_in sender_addr, receiver_addr;
@@ -41,9 +41,9 @@ int main(int argc, char *argv[])
   p_corrupt = atof(argv[4]);
 
   //create socket
-  sockfd = socket(AF_INET, SOCK_DGRAM, 0); 
-  if (sockfd < 0) 
-    error("ERROR opening socket");
+  socketfd = socket(AF_INET, SOCK_DGRAM, 0); 
+  if (socketfd < 0) 
+    error("Error: opening socket failed");
   
   //reset memory
   memset((char *) &sender_addr, 0, sizeof(sender_addr));    
@@ -53,12 +53,12 @@ int main(int argc, char *argv[])
   sender_addr.sin_addr.s_addr = htonl(INADDR_ANY);
   sender_addr.sin_port = htons(portno);
 
-  if (bind(sockfd, (struct sockaddr *) &sender_addr, sizeof(sender_addr)) < 0) 
-    error("ERROR on binding");
+  if (bind(socketfd, (struct sockaddr *) &sender_addr, sizeof(sender_addr)) < 0) 
+    error("Error: bind failed");
 
   while (1) {
     printf("waiting on port %d\n", portno);
-    receive_length = recvfrom(sockfd, buffer, 
+    receive_length = recvfrom(socketfd, buffer, 
       BUFSIZE, 0, (struct sockaddr *)&receiver_addr, &receiver_addr_len);
   }
 
