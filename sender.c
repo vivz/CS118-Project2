@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
     printf("waiting on port %d\n", portno);
     receive_length = recvfrom(socketfd, buffer, 
       BUFSIZE, 0, (struct sockaddr *)&receiver_addr, &receiver_addr_len);
+    printf("received message: %s\n", buffer);
   }
 
   return 0; 
