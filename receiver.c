@@ -26,13 +26,14 @@ int main(int argc, char *argv[])
     int socketfd; 
     int portno, n;
     int receive_length;
+    int execution_no = 0;
     int buffer_full = 0, i = 0, end = 0;
     int window_size, packets_per_window;
     char *filename, *hostname;
     double p_loss, p_corrupt;
     struct sockaddr_in sender_addr;
     socklen_t senderlen = sizeof(sender_addr);
-    FILE* fp;
+    FILE* fp = NULL;
     // contains tons of information, including the server's IP address
     struct hostent *server; 
     char buffer[256];
@@ -83,12 +84,12 @@ int main(int argc, char *argv[])
     // send the file name
     n = sendto(socketfd, &filename_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen);
     if (n < 0) 
-         error("ERROR writing to filename socket");
+        error("ERROR writing to filename socket");
+    else {
+        printf("%d) Sent filename packet\n", execution_no++);
+    }
     
     printf("Requested file %s\n", filename);
-
-    char* new_filename = strcat(filename, "_copy");
-    fp = fopen(new_filename, "wb");
 
     //create a buffer for out-of-order packets
 
@@ -121,6 +122,12 @@ int main(int argc, char *argv[])
       }
 
       else if (received_pkt.type == DATA_TYPE) {
+
+        if (fp == NULL) {
+            char* new_filename = strcat(filename, "_copy");
+            fp = fopen(new_filename, "wb");
+        }
+
         printf("data received: %s\n", received_pkt.data);
         printf("data size: %d\n", received_pkt.data_size);
         printf("ftell is %d, sequence is %d\n", ftell(fp), received_pkt.sequence);
