@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 {
     int sockfd; //Socket descriptor
     int portno, n;
+    double p_loss, p_corrupt;
     struct sockaddr_in serv_addr;
     struct hostent *server; //contains tons of information, including the server's IP address
 
@@ -31,6 +32,9 @@ int main(int argc, char *argv[])
     }
     
     portno = atoi(argv[2]);
+    p_loss = atof(argv[4]);
+    p_corrupt = atof(argv[5]);
+
     sockfd = socket(AF_INET, SOCK_STREAM, 0); //create a new socket
     if (sockfd < 0) 
         error("ERROR opening socket");
