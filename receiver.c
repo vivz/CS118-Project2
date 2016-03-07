@@ -22,13 +22,15 @@ void error(char *msg)
 
 int main(int argc, char *argv[])
 {
-    int socketfd; //Socket descriptor
+    //Socket descriptor
+    int socketfd; 
     int portno, n;
     char *filename, *hostname;
     double p_loss, p_corrupt;
     struct sockaddr_in sender_addr;
     socklen_t senderlen = sizeof(sender_addr);  
-    struct hostent *server; //contains tons of information, including the server's IP address
+    //contains tons of information, including the server's IP address
+    struct hostent *server; 
     char buffer[256];
     struct packet filename_pkt;
     int baselength = sizeof(filename_pkt.type) * 3 + 1;
@@ -44,19 +46,25 @@ int main(int argc, char *argv[])
     p_loss = atof(argv[4]);
     p_corrupt = atof(argv[5]);
     
-    socketfd = socket(AF_INET, SOCK_DGRAM, 0); //create a new socket
+    // create a new socket
+    socketfd = socket(AF_INET, SOCK_DGRAM, 0); 
     if (socketfd < 0) 
         error("ERROR opening socket");
     
-    server = gethostbyname(hostname); //takes a string like "www.yahoo.com", and returns a struct hostent which contains information, as IP address, address type, the length of the addresses...
+    // takes a string like "www.yahoo.com", and returns a struct hostent, 
+    // which contains information, as IP address, address type, 
+    // the length of the addresses...
+    server = gethostbyname(hostname); 
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
         exit(0);
     }
     
-    /* bind the socket to any valid IP address and a specific port */
+    //bind the socket to any valid IP address and a specific port
     memset((char *) &sender_addr, 0, sizeof(sender_addr));
-    sender_addr.sin_family = AF_INET; //initialize server's address
+
+    //initialize server's address
+    sender_addr.sin_family = AF_INET; 
     bcopy((char *)server->h_addr, (char *)&sender_addr.sin_addr.s_addr, server->h_length);
     sender_addr.sin_port = htons(portno);
     
@@ -67,14 +75,15 @@ int main(int argc, char *argv[])
     filename_pkt.size = baselength + strlen(filename);
 
 
-    /*send the file name*/
+    // send the file name
     n = sendto(socketfd, &filename_pkt, filename_pkt.size, 0, (struct sockaddr *)&sender_addr, senderlen);
     if (n < 0) 
          error("ERROR writing to filename socket");
     
     printf("Requested file %s\n", filename);
     
-    close(socketfd); //close socket
+    //close socket
+    close(socketfd); 
     
     return 0;
 }
