@@ -113,27 +113,23 @@ int main(int argc, char *argv[])
       }
 
       else if (received_pkt.type == DATA_TYPE) {
-          printf("data received: %s\n", received_pkt.data);
-          printf("data size: %d\n", received_pkt.data_size);
+        printf("data received: %s\n", received_pkt.data);
+        printf("data size: %d\n", received_pkt.data_size);
 
-          //writing incoming packet to the file
-          n = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
-          if(n < 0)
-          {
-            printf("Error writing to the file\n");
-            continue;
-          }
-          //send acknowledgement packet
-          ack_pkt.sequence = received_pkt.sequence;
-          n = sendto(socketfd, &ack_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen);
-          if (n < 0) 
-             error("ERROR writing to acknowledgement socket");
+        //writing incoming packet to the file
+        n = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
+        if(n < 0)
+        {
+        printf("Error writing to the file\n");
+        continue;
+        }
+        //send acknowledgement packet
+        ack_pkt.sequence = received_pkt.sequence;
+        n = sendto(socketfd, &ack_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen);
+        if (n < 0) 
+         error("ERROR writing to acknowledgement socket");
       }
      
-
-
-
-
     }
 
     fclose(fp);
