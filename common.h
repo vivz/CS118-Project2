@@ -2,6 +2,7 @@
 #define FILENAME_TYPE 0
 #define ACK_TYPE 1
 #define DATA_TYPE 2
+#define END_TYPE 3
 
 
 struct packet

@@ -29,6 +29,9 @@ int main(int argc, char *argv[])
   double p_loss, p_corrupt;
   struct sockaddr_in sender_addr, receiver_addr;
   struct packet received_pkt;
+  struct packet last_pkt;
+  last_pkt.type = END_TYPE;
+
   socklen_t receiver_addr_len = sizeof(receiver_addr);
 
   FILE *file_p;
@@ -99,8 +102,9 @@ int main(int argc, char *argv[])
           }
 
           send_tail++;
-          if(feof(file_p))
-            break;
+          if(feof(file_p)) {
+            n = sendto(socketfd, &last_pkt, sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len);
+          }
       }
       //printPacketArray(packet_array, send_tail);
 
