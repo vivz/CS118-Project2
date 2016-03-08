@@ -8,6 +8,7 @@
 
 #define PRINT_DATA 0
 #define PRINT_BUFFER_STATUS 1
+#define PRINT_SEND_WINDOW_STATUS 1
 
 struct packet
 {

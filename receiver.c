@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
                 // printf("written_data_size: %ld\n", written_data_size);
                 if (written_data_size == expected_data_size){
                     printf("%2d) Full filesize received: %ld\n", execution_no++, written_data_size);
-                    break;
+                    goto send_ack;
                 }
                 // after writing from buffer, update location written from to be an implied buffer tail 
                 // with placeholder and move buffer base to next 
@@ -195,7 +195,8 @@ int main(int argc, char *argv[])
                     // printf("written_data_size: %ld\n", written_data_size);
                     if (written_data_size == expected_data_size){
                         printf("%2d) Full filesize received: %ld\n", execution_no++, written_data_size);
-                        break;
+                        received_pkt = packet_buffer[buffer_base];
+                        goto send_ack;
                     }
                     packet_buffer[buffer_base].type = PLACE_HOLDER_TYPE;
                     // calculating the index right before the buffer_base, accounting for edge case of base being 0 
@@ -240,6 +241,8 @@ int main(int argc, char *argv[])
             else {
                 printf("%2d) Sent ACK packet, Sequence: %ld, Data size: %d\n", 
                     execution_no++, ack_pkt.sequence, ack_pkt.data_size);
+                if (written_data_size == expected_data_size)
+                    break;
             }
         //if the packet isn't expected, don't send ACK
         no_ack:

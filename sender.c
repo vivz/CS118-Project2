@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
   struct packet window_pkt;
   window_pkt.type = WINDOW_SIZE_TYPE;
 
+  long filesize;
   long acknowledged_sent_size = 0;
 
   socklen_t receiver_addr_len = sizeof(receiver_addr);
@@ -86,7 +87,6 @@ int main(int argc, char *argv[])
     if (received_pkt.type == FILENAME_TYPE) {
       //find the file
       char* filename = received_pkt.data;
-      long filesize;
       printf("%2d) Received FILENAME packet, Filename: %s\n", execution_no++, filename);
       file_p = fopen(filename, "r");
 
@@ -125,6 +125,10 @@ int main(int argc, char *argv[])
 
       // /* Comment out if doing out of order testing
       // initial sending of packets
+
+      if (PRINT_SEND_WINDOW_STATUS)
+        printPacketArray(packet_array, packets_per_window);
+
       for (i = 0; i < packets_per_window; i++)
       {
         //TODO: update send_base and send_tail
@@ -175,9 +179,40 @@ int main(int argc, char *argv[])
     else {
 
       if (received_pkt.type == ACK_TYPE) {
-        printf("%2d) Received ACK packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
-        // if ACK is for the base, read into new base, move the base forward, 
-        // send from send_tail, then move that forward
+        printf("%2d) Received ACK packet, Sequence: %ld, Data size: %d\n", 
+          execution_no++, received_pkt.sequence, received_pkt.data_size);
+
+        acknowledged_sent_size += received_pkt.data_size;
+        printf("acknowledged file size: %ld\n", acknowledged_sent_size);
+        if (acknowledged_sent_size == filesize) {
+        	printf("%2d) Full file size acknowledged: %ld\n", execution_no++, filesize);
+        	break;
+        }
+
+        // if ACK is for the base, read into new base, send that, move base forward
+        if (received_pkt.sequence == packet_array[send_base].sequence) 
+        {
+          packet_array[send_base].sequence = ftell(file_p);
+          packet_array[send_base].data_size = fread(packet_array[send_base].data, 1, PACKET_DATA_SIZE, file_p);
+          if (sendto(socketfd, &window_pkt, sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
+          {
+            printf("Error: sending packet after window shift\n");
+            // TODO - not sure if correct, may need to do some recovery here
+            // or maybe this will just be okay
+            break;
+          }
+          else 
+          {
+            printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[send_base].sequence);
+            if (PRINT_DATA)
+              printf("Data: \n%s\n", packet_array[send_base].data);
+            send_base = (send_base + 1) % packets_per_window;
+          }
+        }
+
+        if (PRINT_SEND_WINDOW_STATUS)
+          printPacketArray(packet_array, packets_per_window);
+
       }
       else {
         printf("%2d) received a packet\n", execution_no++);
