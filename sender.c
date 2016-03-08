@@ -118,12 +118,15 @@ int main(int argc, char *argv[])
               break;
           }
       }
+      // testing out of order sending
       int j = 0; 
       int num_array[20]={0,1,3,4,5,6,2,7,8,9,10,11,12,13,14,15,16,17,18,19};
       for( j = 0; j< packets_per_window; j++)
+
+      // for (i = 0; i < packets_per_window; i++)
       {
         //TODO: update send_base and send_tail
-        //order: 0,2,3,4,5,6,2,7,8,9,10...
+        // order: 0,2,3,4,5,6,2,7,8,9,10...
         i = num_array[j];
         if (sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
         {
@@ -134,7 +137,7 @@ int main(int argc, char *argv[])
         {
             if(packet_array[i].type == END_TYPE)
             {
-              printf("END_TYPE sent. DONE.\n");
+              printf("%2d) Sent END_TYPE packet.\n", execution_no++);
               break;
             }
             printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);

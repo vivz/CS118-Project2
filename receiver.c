@@ -36,7 +36,6 @@ int main(int argc, char *argv[])
     FILE* fp = NULL;
     // contains tons of information, including the server's IP address
     struct hostent *server; 
-    char buffer[256];
     struct packet filename_pkt, received_pkt, ack_pkt;
     struct packet *packet_buffer;
     int buffer_base = 0, buffer_tail = 0;
@@ -141,12 +140,13 @@ int main(int argc, char *argv[])
         if(ftell(fp) == received_pkt.sequence){
             //writing incoming packet to the file
             n = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
-            printf("%2d) Wrote DATA packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
-
             if(n < 0)
             {
                 printf("Error writing to the file\n");
                 continue;
+            }
+            else {
+                printf("%2d) Wrote DATA packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
             }
             end = 0;
             //go through the buffer 
@@ -165,11 +165,16 @@ int main(int argc, char *argv[])
                     }
                     //TODO: wrap around sequence number when it exceeds
                     //fill the next expected spot with a place-holder 
+                    printf("before update\n");
+                    printPacketArray(packet_buffer, 19);
                     packet_buffer[i].type = PLACE_HOLDER_TYPE;
-                    if( i!= 0)
+                    if(i!= 0) {
                         packet_buffer[i].sequence = packet_buffer[i-1].sequence + PACKET_DATA_SIZE;
-                    else 
+                        printf("after update\n");
+                    }
+                    else {
                         packet_buffer[i].sequence = packet_buffer[packets_per_window - 1].sequence + PACKET_DATA_SIZE;
+                    }
                     end = 1; 
                 }
                 //don't check the rest if we finish writing the ones in order
@@ -183,15 +188,23 @@ int main(int argc, char *argv[])
         //if it's out of order, put it in the buffer
         else
         {
+            printf("before update\n");
+            printPacketArray(packet_buffer, 19);
             printf("this packet is out of order\n");
             for(i = 0; i != packets_per_window; i++)
             {
                 if(received_pkt.sequence == packet_buffer[i].sequence)
                 {
+                    printf("%2d) Received packet (Sequence: %ld) put at buffer location %d\n", 
+                        execution_no++, received_pkt.sequence, i);
                     packet_buffer[i] = received_pkt; 
+                    printf("after update\n");
+
                     goto send_ack;
                 }
             }
+            printf("%2d) Received packet (Sequence: %ld) not in window range, dropping\n", 
+                execution_no++, received_pkt.sequence);
             //if this packet isn't expected, we just drop it   
             goto no_ack;
         }
