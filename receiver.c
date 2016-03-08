@@ -148,30 +148,41 @@ int main(int argc, char *argv[])
                 continue;
             }
             else 
+            // writing was successful
             {
                 printf("%2d) Wrote DATA packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
-                // printf("before update\n");
-                // printPacketArray(packet_buffer, packets_per_window);
+
+                // after writing from buffer, update location written from to be an implied buffer tail 
+                // with placeholder and move buffer base to next 
+
                 packet_buffer[buffer_base].type = PLACE_HOLDER_TYPE;
                 if (buffer_base == 0) 
-                {
                     packet_buffer[buffer_base].sequence = packet_buffer[packets_per_window - 1].sequence + PACKET_DATA_SIZE;
-                } 
                 else 
-                {
                     packet_buffer[buffer_base].sequence = packet_buffer[buffer_base-1].sequence + PACKET_DATA_SIZE;
-                }
-                if (buffer_base == packets_per_window)
-                    buffer_base = 0;
-                else 
-                {
-                    buffer_base++;
-                }
-                // printf("after update\n");
-                // printPacketArray(packet_buffer, packets_per_window);
+
+                buffer_base = (buffer_base + 1) % packets_per_window;
 
             }
-            /*
+
+            // if (packet_buffer[buffer_base].sequence == ftell(fp) && 
+            //     packet_buffer[buffer_base].type != PLACE_HOLDER_TYPE)
+            // {
+            //     n = fwrite(packet_buffer[buffer_base].data,packet_buffer[buffer_base].data_size,1,fp);
+            //     if (n < 0) 
+            //     {
+            //         printf("Failed writing buffered packet to the file\n");
+            //         break;
+            //     } 
+            //     else
+            //     {
+            //         printf("%2d) Wrote DATA packet from the buffer, Sequence: %ld\n", execution_no++, packet_buffer[buffer_base].sequence);
+
+            //         buffer_base = (buffer_base + 1) % packets_per_window;
+
+            //     }
+            // }
+            
             end = 0;
             //go through the buffer 
             for(i = 0; i != packets_per_window; i++)
@@ -208,7 +219,7 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            */
+            
         }
         //if it's out of order, put it in the buffer
         else
