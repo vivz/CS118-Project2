@@ -156,86 +156,52 @@ int main(int argc, char *argv[])
                 // with placeholder and move buffer base to next 
 
                 packet_buffer[buffer_base].type = PLACE_HOLDER_TYPE;
-                if (buffer_base == 0) 
-                    packet_buffer[buffer_base].sequence = packet_buffer[packets_per_window - 1].sequence + PACKET_DATA_SIZE;
-                else 
-                    packet_buffer[buffer_base].sequence = packet_buffer[buffer_base-1].sequence + PACKET_DATA_SIZE;
 
+                // calculating the index right before the buffer_base, accounting for edge case of base being 0 
+                buffer_tail = buffer_base == 0 ? packets_per_window - 1 : buffer_base - 1;
+                packet_buffer[buffer_base].sequence = packet_buffer[buffer_tail].sequence + PACKET_DATA_SIZE;
                 buffer_base = (buffer_base + 1) % packets_per_window;
-
-            }
-
-            // if (packet_buffer[buffer_base].sequence == ftell(fp) && 
-            //     packet_buffer[buffer_base].type != PLACE_HOLDER_TYPE)
-            // {
-            //     n = fwrite(packet_buffer[buffer_base].data,packet_buffer[buffer_base].data_size,1,fp);
-            //     if (n < 0) 
-            //     {
-            //         printf("Failed writing buffered packet to the file\n");
-            //         break;
-            //     } 
-            //     else
-            //     {
-            //         printf("%2d) Wrote DATA packet from the buffer, Sequence: %ld\n", execution_no++, packet_buffer[buffer_base].sequence);
-
-            //         buffer_base = (buffer_base + 1) % packets_per_window;
-
-            //     }
-            // }
-            
-            end = 0;
-            //go through the buffer 
-            for(i = 0; i != packets_per_window; i++)
-            {
-                if(packet_buffer[i].sequence == ftell(fp) && packet_buffer[i].type != PLACE_HOLDER_TYPE)
-                {
-                    //write in-order buffered packets
-                    if(fwrite(packet_buffer[i].data,packet_buffer[i].data_size,1,fp) <0 )
-                    {
-                        printf("Failed writing buffered packet to the file\n");
-                        break;
-                    }
-                    else {
-                        printf("%2d) Wrote DATA packet from the buffer, Sequence: %ld\n", execution_no++, packet_buffer[i].sequence);
-                    }
-                    //TODO: wrap around sequence number when it exceeds
-                    //fill the next expected spot with a place-holder 
-                    printf("before update\n");
+                if (PRINT_BUFFER_STATUS)
                     printPacketArray(packet_buffer, packets_per_window);
-                    packet_buffer[i].type = PLACE_HOLDER_TYPE;
-                    if(i!= 0) {
-                        packet_buffer[i].sequence = packet_buffer[i-1].sequence + PACKET_DATA_SIZE;
-                        printf("after update\n");
-                    }
-                    else {
-                        packet_buffer[i].sequence = packet_buffer[packets_per_window - 1].sequence + PACKET_DATA_SIZE;
-                    }
-                    end = 1; 
-                }
-                //don't check the rest if we finish writing the ones in order
-                else if(end == 1)
+
+            }
+
+            // after successful in order write, we want to write out any
+            // data packets waiting in the buffer
+            while (packet_buffer[buffer_base].sequence == ftell(fp) && 
+                packet_buffer[buffer_base].type != PLACE_HOLDER_TYPE)
+            {
+                n = fwrite(packet_buffer[buffer_base].data,packet_buffer[buffer_base].data_size,1,fp);
+                if (n < 0) 
                 {
-                    end = 0;
+                    printf("Failed writing buffered packet to the file\n");
                     break;
+                } 
+                else
+                {
+                    printf("%2d) Wrote DATA packet from the buffer, Sequence: %ld\n", execution_no++, packet_buffer[buffer_base].sequence);
+                    packet_buffer[buffer_base].type = PLACE_HOLDER_TYPE;
+                    // calculating the index right before the buffer_base, accounting for edge case of base being 0 
+                    buffer_tail = buffer_base == 0 ? packets_per_window - 1 : buffer_base - 1;
+                    packet_buffer[buffer_base].sequence = packet_buffer[buffer_tail].sequence + PACKET_DATA_SIZE;
+                    buffer_base = (buffer_base + 1) % packets_per_window;
+                    if (PRINT_BUFFER_STATUS)
+                        printPacketArray(packet_buffer, packets_per_window);
                 }
             }
-            
         }
         //if it's out of order, put it in the buffer
         else
         {
-            printf("before update\n");
-            printPacketArray(packet_buffer, packets_per_window);
-            printf("this packet is out of order\n");
             for(i = 0; i != packets_per_window; i++)
             {
                 if(received_pkt.sequence == packet_buffer[i].sequence)
                 {
-                    printf("%2d) Received packet (Sequence: %ld) put at buffer location %d\n", 
+                    printf("%2d) Received out of order packet (Sequence: %ld) put at buffer location %d\n", 
                         execution_no++, received_pkt.sequence, i);
                     packet_buffer[i] = received_pkt; 
-                    printf("after update\n");
-
+                    if (PRINT_BUFFER_STATUS)
+                        printPacketArray(packet_buffer, packets_per_window);
                     goto send_ack;
                 }
             }
@@ -246,18 +212,19 @@ int main(int argc, char *argv[])
         }
 
         //send acknowledgement packet
-        send_ack:;
-        ack_pkt.sequence = received_pkt.sequence;
-        if(sendto(socketfd, &ack_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen) < 0)
-        {
-            printf("ERROR writing to acknowledgement socket");
-            continue;
-        }
-        else {
-            printf("%2d) Sent ACK packet, Sequence: %ld\n", execution_no++, ack_pkt.sequence);
-        }
+        send_ack:
+            ack_pkt.sequence = received_pkt.sequence;
+            if(sendto(socketfd, &ack_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen) < 0)
+            {
+                printf("ERROR writing to acknowledgement socket");
+                continue;
+            }
+            else {
+                printf("%2d) Sent ACK packet, Sequence: %ld\n", execution_no++, ack_pkt.sequence);
+            }
         //if the packet isn't expected, don't send ACK
-        no_ack:;
+        no_ack:
+            ;
       } //end of else if (received_pkt.type == DATA_TYPE)
      
     }//end of while 1

@@ -7,6 +7,7 @@
 #define PLACE_HOLDER_TYPE 5
 
 #define PRINT_DATA 0
+#define PRINT_BUFFER_STATUS 1
 
 struct packet
 {
