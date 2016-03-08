@@ -201,12 +201,9 @@ int main(int argc, char *argv[])
       // if ACK is for the base, read into new base, send that, move base forward
       if (received_pkt.sequence == packet_array[send_base].sequence) 
       {
-      	if (feof(file_p))
-      	{
-      		;
-      	}
-      	else 
-      	{
+      	while (received_pkt.sequence == packet_array[send_base].sequence ||
+      		 		 packet_array[send_base].type == ACK_TYPE)
+	      {
 	      	packet_array[send_base].type = DATA_TYPE;
 	        packet_array[send_base].sequence = ftell(file_p) % MAX_SEQUENCE_NUMBER;
 	        packet_array[send_base].data_size = fread(packet_array[send_base].data, 1, PACKET_DATA_SIZE, file_p);
@@ -224,9 +221,25 @@ int main(int argc, char *argv[])
 	            printf("Data: \n%s\n", packet_array[send_base].data);
 	          send_base = (send_base + 1) % packets_per_window;
 	        }
+	      }
+      }
+      // ACK is not the base
+      else 
+      {
+
+      	// printf("Received ACK not base, Sequence: %ld\n", received_pkt.sequence);
+
+      	for (i = (send_base + 1) % packets_per_window; i != send_base; i = (i + 1) % packets_per_window)
+      	{
+      		// printf("looped sequence: %ld\n", packet_array[i].sequence);
+      		if (packet_array[i].sequence == received_pkt.sequence)
+      		{
+      			// printf("ACK not base set\n");
+      			packet_array[i] = received_pkt;
+      			break;
+      		}
       	}
       }
-
       if (PRINT_SEND_WINDOW_STATUS)
         printPacketArray(packet_array, packets_per_window);
 
