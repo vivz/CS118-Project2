@@ -29,6 +29,7 @@ rr:
 	make runreceiver
 
 test:
+	make
 	echo "#!/bin/sh\ncd $(cwd)\nmake rr\nzsh" > sender.sh 
 	open -a Terminal.app sender.sh
 	chmod +x sender.sh
