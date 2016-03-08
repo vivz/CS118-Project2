@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
         execution_no++, received_pkt.sequence, received_pkt.data_size);
 
       acknowledged_sent_size += received_pkt.data_size;
-      printf("acknowledged file size: %ld\n", acknowledged_sent_size);
+      // printf("acknowledged file size: %ld\n", acknowledged_sent_size);
       if (acknowledged_sent_size == filesize) 
       {
       	printf("%2d) Full file size acknowledged: %ld\n", execution_no++, filesize);

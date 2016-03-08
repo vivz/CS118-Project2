@@ -146,7 +146,9 @@ int main(int argc, char *argv[])
         //printf("ftell is %ld\n", ftell(fp));
 
         //if the packet is in order
-        if(ftell(fp) == received_pkt.sequence){
+        // if(ftell(fp) == received_pkt.sequence)
+        if (packet_buffer[buffer_base].sequence == received_pkt.sequence)
+        {
             //writing incoming packet to the file
             error_flag = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
             if(error_flag < 0)
