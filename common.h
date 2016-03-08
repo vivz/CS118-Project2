@@ -48,7 +48,8 @@ void printPacket(struct packet p)
 
 void printPacketArray(struct packet pa[], int size)
 {
-    for(int i = 0; i < size; i++)
+    int i;
+    for(i = 0; i < size; i++)
     {
         printPacket(pa[i]);
     }
