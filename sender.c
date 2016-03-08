@@ -78,17 +78,19 @@ int main(int argc, char *argv[])
   send_tail = packets_per_window - 1;
   time_t timestamps[packets_per_window];
   time_t current_time;
+	time(&current_time);
+
   for (i = 0; i < packets_per_window; i++)
   {
   	// initializing times to a year from now
-  	timestamps[i] = time() + 365 * 24 * 60 * 60;
+  	timestamps[i] = current_time + 365 * 24 * 60 * 60;
+  	printf("timestamp at index %d: %ld\n", i, timestamps[i]);
   }
   while (1) 
   {
   	time(&current_time);
   	for (i = 0; i < packets_per_window; i++) 
   	{
-  		printf("in time loop\n");
   		if ((current_time - timestamps[i]) > TIMEOUT)
   		{
         if (sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
@@ -176,10 +178,10 @@ int main(int argc, char *argv[])
         }
         else 
         {
-        		timestamps[i] = time();
             printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
             if (PRINT_DATA)
               printf("Data: \n%s\n", packet_array[i].data);
+        		timestamps[i] = time();
         }
       }
     }  //end of if (received_pkt.type == FILENAME_TYPE)
@@ -214,10 +216,10 @@ int main(int argc, char *argv[])
 	        }
 	        else 
 	        {
-	        	timestamps[send_base] = time();
 	          printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[send_base].sequence);
 	          if (PRINT_DATA)
 	            printf("Data: \n%s\n", packet_array[send_base].data);
+	        	timestamps[send_base] = time();
 	          send_base = (send_base + 1) % packets_per_window;
 	        }
 	      }
@@ -260,8 +262,8 @@ int main(int argc, char *argv[])
 	        }
 	        else 
 	        {
-	        	timestamps[i] = time();
 	          printf("%2d) (Re)Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
+	        	timestamps[i] = time();
 	        }
 
       	}
