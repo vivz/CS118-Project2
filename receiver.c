@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
             }
             else {
                 printf("%2d) Sent RETRANSMISSION packet, Sequence: %ld\n", 
-                    execution_no++, retransmission_pkt.sequence, retransmission_pkt.data_size);
+                    execution_no++, retransmission_pkt.sequence);
                 if (written_data_size == expected_data_size)
                     break;
             }

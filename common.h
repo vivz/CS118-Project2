@@ -13,6 +13,8 @@
 
 #define MAX_SEQUENCE_NUMBER 30720
 
+#define TIMEOUT 5
+
 struct packet
 {
 	int type;

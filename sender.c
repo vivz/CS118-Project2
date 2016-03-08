@@ -76,9 +76,36 @@ int main(int argc, char *argv[])
   struct packet packet_array[packets_per_window];
   window_pkt.data_size = window_size;
   send_tail = packets_per_window - 1;
-
+  time_t timestamps[packets_per_window];
+  time_t current_time;
+  for (i = 0; i < packets_per_window; i++)
+  {
+  	// initializing times to a year from now
+  	timestamps[i] = time() + 365 * 24 * 60 * 60;
+  }
   while (1) 
   {
+  	time(&current_time);
+  	for (i = 0; i < packets_per_window; i++) 
+  	{
+  		printf("in time loop\n");
+  		if ((current_time - timestamps[i]) > TIMEOUT)
+  		{
+        if (sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
+        {
+            printf("Error writing to socket\n");
+            break;
+        }
+        else 
+        {
+        		timestamps[i] = time();
+            printf("%2d) Timeout. Re-sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
+            if (PRINT_DATA)
+              printf("Data: \n%s\n", packet_array[i].data);
+        }
+  		}
+  	}
+
     //receiving a packet
     receive_length = recvfrom(socketfd, &received_pkt, 
       sizeof(received_pkt), 
@@ -149,6 +176,7 @@ int main(int argc, char *argv[])
         }
         else 
         {
+        		timestamps[i] = time();
             printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
             if (PRINT_DATA)
               printf("Data: \n%s\n", packet_array[i].data);
@@ -186,6 +214,7 @@ int main(int argc, char *argv[])
 	        }
 	        else 
 	        {
+	        	timestamps[send_base] = time();
 	          printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[send_base].sequence);
 	          if (PRINT_DATA)
 	            printf("Data: \n%s\n", packet_array[send_base].data);
@@ -231,6 +260,7 @@ int main(int argc, char *argv[])
 	        }
 	        else 
 	        {
+	        	timestamps[i] = time();
 	          printf("%2d) (Re)Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
 	        }
 
