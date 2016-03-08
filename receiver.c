@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 {
     // Socket descriptor
     int socketfd; 
-    int portno, n;
+    int portno, error_flag;
     int receive_length;
     int execution_no = 0;
     int buffer_full = 0, i = 0, end = 0;
@@ -81,8 +81,8 @@ int main(int argc, char *argv[])
     filename_pkt.data_size = strlen(filename); 
 
     // send the file name
-    n = sendto(socketfd, &filename_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen);
-    if (n < 0) 
+    error_flag = sendto(socketfd, &filename_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen);
+    if (error_flag < 0) 
         error("ERROR writing to filename socket");
     else {
         printf("%2d) Sent FILENAME packet, Requested: %s\n", execution_no++, filename);
@@ -141,8 +141,8 @@ int main(int argc, char *argv[])
         //if the packet is in order
         if(ftell(fp) == received_pkt.sequence){
             //writing incoming packet to the file
-            n = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
-            if(n < 0)
+            error_flag = fwrite(received_pkt.data,received_pkt.data_size,1,fp);
+            if(error_flag < 0)
             {
                 printf("Error writing to the file\n");
                 continue;
@@ -171,8 +171,8 @@ int main(int argc, char *argv[])
             while (packet_buffer[buffer_base].sequence == ftell(fp) && 
                 packet_buffer[buffer_base].type != PLACE_HOLDER_TYPE)
             {
-                n = fwrite(packet_buffer[buffer_base].data,packet_buffer[buffer_base].data_size,1,fp);
-                if (n < 0) 
+                error_flag = fwrite(packet_buffer[buffer_base].data,packet_buffer[buffer_base].data_size,1,fp);
+                if (error_flag < 0) 
                 {
                     printf("Failed writing buffered packet to the file\n");
                     break;

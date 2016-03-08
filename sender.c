@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 {
   int socketfd, newsocketfd, portno, pid, window_size;
   int receive_length;
-  int send_base = 0, send_tail = 0;
+  int send_base = 0, send_tail;
   int i = 0, n = 0;
   int execution_no = 0;
   double p_loss, p_corrupt;
@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
   int packets_per_window = (window_size * 1024) / sizeof(struct packet);
   struct packet packet_array[packets_per_window];
   window_pkt.data_size = packets_per_window;
+  send_tail = packets_per_window - 1;
 
   while (1) {
     //receiving a packet
@@ -84,13 +85,23 @@ int main(int argc, char *argv[])
     if (received_pkt.type == FILENAME_TYPE) {
       //find the file
       char* filename = received_pkt.data;
+      long filesize;
       printf("%2d) Received FILENAME packet, Filename: %s\n", execution_no++, filename);
       file_p = fopen(filename, "r");
 
       if (file_p == NULL) {
         printf("Error: file not found\n");
-        continue;
+        exit(1);
       }
+      else {
+        // send the size of the file as the sequence number in the window packet
+        // janky, I know
+        fseek (file_p , 0 , SEEK_END);
+        filesize = ftell (file_p);
+        rewind (pFile);
+        window_pkt.sequence = filesize;
+      }
+
 
       // let the receiver know our window size
       if (sendto(socketfd, &window_pkt, sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
@@ -99,7 +110,7 @@ int main(int argc, char *argv[])
           continue;
       }
       else {
-          printf("%2d) Sent WINDOW_SIZE packet, Window Size: %d\n", execution_no++, packets_per_window);
+          printf("%2d) Sent WINDOW_SIZE packet, Window Size: %d, Filesize: %ld\n", execution_no++, packets_per_window, filesize);
       }
 
       //Initialize the first packet array
@@ -120,9 +131,11 @@ int main(int argc, char *argv[])
       }
 
       // /* Comment out if doing out of order testing
+      // initial sending of packets
       for (i = 0; i < packets_per_window; i++)
       {
         //TODO: update send_base and send_tail
+
         if (sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
         {
             printf("Error writing to socket\n");
@@ -175,6 +188,8 @@ int main(int argc, char *argv[])
 
       if (received_pkt.type == ACK_TYPE) {
         printf("%2d) Received ACK packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
+        // if ACK is for the base, read into new base, move the base forward, 
+        // send from send_tail, then move that forward
       }
       else {
         printf("%2d) received a packet\n", execution_no++);
