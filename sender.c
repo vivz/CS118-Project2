@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
   int receive_length;
   int send_base = 0, send_tail;
   int i = 0, n = 0;
+  int last_packet_index = 0;
   int execution_no = 0;
   double p_loss, p_corrupt;
   struct sockaddr_in sender_addr, receiver_addr;
@@ -119,10 +120,15 @@ int main(int argc, char *argv[])
       //Initialize the first packet array
       for (i=0; i<packets_per_window; i++)
       {
-          //TODO: Wrap around sequence number when it exceeds
           packet_array[i].type = DATA_TYPE;
           packet_array[i].sequence = ftell(file_p) % MAX_SEQUENCE_NUMBER;
           packet_array[i].data_size = fread(packet_array[i].data, 1, PACKET_DATA_SIZE, file_p);
+      		last_packet_index = i;
+
+          if (feof(file_p))
+          {
+          		break;
+          }
       }
 
       // /* Comment out if doing out of order testing
@@ -131,7 +137,7 @@ int main(int argc, char *argv[])
       if (PRINT_SEND_WINDOW_STATUS)
         printPacketArray(packet_array, packets_per_window);
 
-      for (i = 0; i < packets_per_window; i++)
+      for (i = 0; i <= last_packet_index; i++)
       {
         //TODO: update send_base and send_tail
 

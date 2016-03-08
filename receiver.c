@@ -185,7 +185,6 @@ int main(int argc, char *argv[])
             // after successful in order write, we want to write out any
             // data packets waiting in the buffer
 
-            // don't think this first boolean check is quite correct
             while (packet_buffer[buffer_base].sequence == last_written_sequence + PACKET_DATA_SIZE && 
                 packet_buffer[buffer_base].type != PLACE_HOLDER_TYPE)
             {
