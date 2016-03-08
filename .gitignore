@@ -4,3 +4,4 @@ receiver
 receiver_dir/
 a.out
 *_copy
+sender.sh
