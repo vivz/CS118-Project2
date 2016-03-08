@@ -1,7 +1,7 @@
 portnum = 14000
 window_size = 3
 p_loss = 0.0
-p_corrupt = 0.7
+p_corrupt = 0.5
 host = "localhost"
 filename = small.txt
 cwd = $(shell pwd)

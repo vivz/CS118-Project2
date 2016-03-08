@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
             // after successful in order write, we want to write out any
             // data packets waiting in the buffer
 
-            while (packet_buffer[buffer_base].sequence == last_written_sequence + PACKET_DATA_SIZE && 
+            while (packet_buffer[buffer_base].sequence == (last_written_sequence + PACKET_DATA_SIZE) % MAX_SEQUENCE_NUMBER && 
                 packet_buffer[buffer_base].type != PLACE_HOLDER_TYPE)
             {
                 error_flag = fwrite(packet_buffer[buffer_base].data,packet_buffer[buffer_base].data_size,1,fp);

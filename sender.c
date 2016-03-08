@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
       {
       	if (packet_array[i].sequence == received_pkt.sequence) 
       	{
-      		printf("found packet in send window\n");
+      		// printf("found packet in send window\n");
 	        if (sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
 	        {
 	        	printf("Error resending packet\n");
