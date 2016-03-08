@@ -10,6 +10,8 @@
 #include <netdb.h>      // define structures like hostent
 #include <stdlib.h>
 #include <strings.h>
+#include <time.h>
+#include <math.h>
 
 #include "common.h"
 
@@ -58,6 +60,7 @@ int main(int argc, char *argv[])
     p_loss = atof(argv[4]);
     p_corrupt = atof(argv[5]);
     
+
     // create a new socket
     socketfd = socket(AF_INET, SOCK_DGRAM, 0); 
     if (socketfd < 0) 
@@ -141,11 +144,20 @@ int main(int argc, char *argv[])
             printf("%2d) Created %s\n", execution_no++, new_filename);
         }
 
+        // Corruption
+        float random_prob = (rand() % 10000) / 10000.0;
+        if (random_prob < p_corrupt) {
+            
+            goto send_retransmission;
+        }
+
         printf("%2d) Received DATA packet, Size: %d, Sequence: %ld\n", 
             execution_no++, received_pkt.data_size, received_pkt.sequence);
         if (PRINT_DATA)
             printf("Data: \n%s\n", received_pkt.data);
         //printf("ftell is %ld\n", ftell(fp));
+
+
 
         //if the packet is in order
         if (packet_buffer[buffer_base].sequence == received_pkt.sequence)
@@ -230,8 +242,6 @@ int main(int argc, char *argv[])
                     goto send_ack;
                 }
             }
-            printf("%2d) Received packet (Sequence: %ld) not in window range, dropping\n", 
-                execution_no++, received_pkt.sequence);
             //if this packet isn't expected, we just drop it   
             goto no_ack;
         }
@@ -253,7 +263,18 @@ int main(int argc, char *argv[])
             }
         //if the packet isn't expected, don't send ACK
         no_ack:
-            ;
+            printf("%2d) Received packet (Sequence: %ld) not in window range, dropping\n", 
+                execution_no++, received_pkt.sequence);
+            break;
+
+        send_retransmission:
+            printf("%2d) Received DATA packet, Size: %d, Sequence: %ld, Corrupted\n", 
+                execution_no++, received_pkt.data_size, received_pkt.sequence);
+            struct packet retransmission_pkt;
+            retransmission_pkt.type = RETRANSMISSION_TYPE;
+            retransmission_pkt.sequence = received_pkt.sequence;
+            break;
+
       } //end of else if (received_pkt.type == DATA_TYPE)
      
     }//end of while 1
