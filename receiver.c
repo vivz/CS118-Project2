@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
     int baselength = sizeof(filename_pkt.type) * 3 + 1;
     ack_pkt.type = ACK_TYPE;
     
+
+    long expected_data_size, written_data_size = 0;
     if (argc < 6) {
        fprintf(stderr,"usage: %s <hostname> <port> <filename> <p(loss)> <p(corruption)>\n", argv[0]);
        exit(1);
@@ -110,16 +112,20 @@ int main(int argc, char *argv[])
       else if(received_pkt.type == WINDOW_SIZE_TYPE)
       {
         window_size = received_pkt.data_size;
-        printf("%2d) Received WINDOW_SIZE packet, Window Size: %d\n", execution_no++, window_size);
         //initializing packet buffer array
         packets_per_window = (window_size * 1024) / sizeof(struct packet);
-        printf("packets per window: %d\n", packets_per_window);
+        // printf("packets per window: %d\n", packets_per_window);
         packet_buffer = (struct packet*) malloc(packets_per_window * sizeof(struct packet));
         for(i = 0; i < packets_per_window; i++)
         {
             packet_buffer[i].type = PLACE_HOLDER_TYPE;
             packet_buffer[i].sequence = i * PACKET_DATA_SIZE;
         }
+
+        // we put the data size in the sequence field, janky I know
+        expected_data_size = received_pkt.sequence;
+        printf("%2d) Received WINDOW_SIZE packet, Window Size: %d, Filesize: %ld, Packets Per Window: %d\n", 
+            execution_no++, window_size, expected_data_size, packets_per_window);
         continue;
       }
 
@@ -151,7 +157,12 @@ int main(int argc, char *argv[])
             // writing was successful
             {
                 printf("%2d) Wrote DATA packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
-
+                written_data_size += received_pkt.data_size;
+                // printf("written_data_size: %ld\n", written_data_size);
+                if (written_data_size == expected_data_size){
+                    printf("%2d) Full filesize received: %ld\n", execution_no++, written_data_size);
+                    break;
+                }
                 // after writing from buffer, update location written from to be an implied buffer tail 
                 // with placeholder and move buffer base to next 
 
@@ -180,6 +191,12 @@ int main(int argc, char *argv[])
                 else
                 {
                     printf("%2d) Wrote DATA packet from the buffer, Sequence: %ld\n", execution_no++, packet_buffer[buffer_base].sequence);
+                    written_data_size += received_pkt.data_size;
+                    // printf("written_data_size: %ld\n", written_data_size);
+                    if (written_data_size == expected_data_size){
+                        printf("%2d) Full filesize received: %ld\n", execution_no++, written_data_size);
+                        break;
+                    }
                     packet_buffer[buffer_base].type = PLACE_HOLDER_TYPE;
                     // calculating the index right before the buffer_base, accounting for edge case of base being 0 
                     buffer_tail = buffer_base == 0 ? packets_per_window - 1 : buffer_base - 1;

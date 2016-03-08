@@ -30,8 +30,7 @@ int main(int argc, char *argv[])
   double p_loss, p_corrupt;
   struct sockaddr_in sender_addr, receiver_addr;
   struct packet received_pkt;
-  struct packet last_pkt, window_pkt;
-  last_pkt.type = END_TYPE;
+  struct packet window_pkt;
   window_pkt.type = WINDOW_SIZE_TYPE;
 
   socklen_t receiver_addr_len = sizeof(receiver_addr);
@@ -96,9 +95,9 @@ int main(int argc, char *argv[])
       else {
         // send the size of the file as the sequence number in the window packet
         // janky, I know
-        fseek (file_p , 0 , SEEK_END);
-        filesize = ftell (file_p);
-        rewind (pFile);
+        fseek(file_p, 0, SEEK_END);
+        filesize = ftell(file_p);
+        rewind(file_p);
         window_pkt.sequence = filesize;
       }
 
@@ -120,14 +119,6 @@ int main(int argc, char *argv[])
           packet_array[i].type = DATA_TYPE;
           packet_array[i].sequence =  ftell(file_p);
           packet_array[i].data_size = fread(packet_array[i].data, 1, PACKET_DATA_SIZE, file_p);
-
-          //if the file ends even before we fill the inital array
-          if(feof(file_p))
-          {
-              packet_array[i+1] = last_pkt;
-              fclose(file_p);
-              break;
-          }
       }
 
       // /* Comment out if doing out of order testing
@@ -143,11 +134,6 @@ int main(int argc, char *argv[])
         }
         else 
         {
-            if(packet_array[i].type == END_TYPE)
-            {
-              printf("%2d) Sent END packet.\n", execution_no++);
-              break;
-            }
             printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
             if (PRINT_DATA)
               printf("Data: \n%s\n", packet_array[i].data);
