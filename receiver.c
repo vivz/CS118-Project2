@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
             {
                 if(received_pkt.sequence == packet_buffer[i].sequence)
                 {
-                    printf("%2d) Received out of order packet (Sequence: %ld) put at buffer location %d\n", 
+                    printf("%2d) Received DATA out of order packet (Sequence: %ld) put at buffer location %d\n", 
                         execution_no++, received_pkt.sequence, i);
                     packet_buffer[i] = received_pkt; 
                     if (PRINT_BUFFER_STATUS)
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
                 }
             }
             //if this packet isn't expected, we just drop it   
-            printf("%2d) Received packet (Sequence: %ld) not in window range, dropping\n", 
+            printf("%2d) Received DATA packet (Sequence: %ld) not in window range, dropping\n", 
                 execution_no++, received_pkt.sequence);
             goto no_ack;
         }
@@ -275,6 +275,17 @@ int main(int argc, char *argv[])
             struct packet retransmission_pkt;
             retransmission_pkt.type = RETRANSMISSION_TYPE;
             retransmission_pkt.sequence = received_pkt.sequence;
+            if(sendto(socketfd, &retransmission_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen) < 0)
+            {
+                printf("ERROR sending retransmission packet");
+                continue;
+            }
+            else {
+                printf("%2d) Sent RETRANSMISSION packet, Sequence: %ld\n", 
+                    execution_no++, retransmission_pkt.sequence, retransmission_pkt.data_size);
+                if (written_data_size == expected_data_size)
+                    break;
+            }
             continue;
 
       } //end of else if (received_pkt.type == DATA_TYPE)
