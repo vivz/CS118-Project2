@@ -86,11 +86,9 @@ int main(int argc, char *argv[])
     if (n < 0) 
         error("ERROR writing to filename socket");
     else {
-        printf("%2d) Sent filename packet\n", execution_no++);
+        printf("%2d) Sent FILENAME packet, Requested: %s\n", execution_no++, filename);
     }
     
-    printf("Requested file %s\n", filename);
-
     while(1)
     {
       //receiving a packet
