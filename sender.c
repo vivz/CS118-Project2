@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
       {
           //TODO: Wrap around sequence number when it exceeds
           packet_array[i].type = DATA_TYPE;
-          packet_array[i].sequence =  ftell(file_p);
+          packet_array[i].sequence = ftell(file_p) % MAX_SEQUENCE_NUMBER;
           packet_array[i].data_size = fread(packet_array[i].data, 1, PACKET_DATA_SIZE, file_p);
       }
 
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
       if (received_pkt.sequence == packet_array[send_base].sequence) 
       {
       	packet_array[send_base].type = DATA_TYPE;
-        packet_array[send_base].sequence = ftell(file_p);
+        packet_array[send_base].sequence = ftell(file_p) % MAX_SEQUENCE_NUMBER;
         packet_array[send_base].data_size = fread(packet_array[send_base].data, 1, PACKET_DATA_SIZE, file_p);
         if (sendto(socketfd, &packet_array[send_base], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
         {

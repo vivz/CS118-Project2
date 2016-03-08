@@ -10,6 +10,8 @@
 #define PRINT_BUFFER_STATUS 0
 #define PRINT_SEND_WINDOW_STATUS 0
 
+#define MAX_SEQUENCE_NUMBER 30720
+
 struct packet
 {
 	int type;

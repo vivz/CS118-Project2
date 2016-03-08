@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         for(i = 0; i < packets_per_window; i++)
         {
             packet_buffer[i].type = PLACE_HOLDER_TYPE;
-            packet_buffer[i].sequence = i * PACKET_DATA_SIZE;
+            packet_buffer[i].sequence = (i * PACKET_DATA_SIZE) % MAX_SEQUENCE_NUMBER;
         }
 
         // we put the data size in the sequence field, janky I know
@@ -146,7 +146,6 @@ int main(int argc, char *argv[])
         //printf("ftell is %ld\n", ftell(fp));
 
         //if the packet is in order
-        // if(ftell(fp) == received_pkt.sequence)
         if (packet_buffer[buffer_base].sequence == received_pkt.sequence)
         {
             //writing incoming packet to the file
@@ -173,7 +172,7 @@ int main(int argc, char *argv[])
 
                 // calculating the index right before the buffer_base, accounting for edge case of base being 0 
                 buffer_tail = buffer_base == 0 ? packets_per_window - 1 : buffer_base - 1;
-                packet_buffer[buffer_base].sequence = packet_buffer[buffer_tail].sequence + PACKET_DATA_SIZE;
+                packet_buffer[buffer_base].sequence = (packet_buffer[buffer_tail].sequence + PACKET_DATA_SIZE) % MAX_SEQUENCE_NUMBER;
                 buffer_base = (buffer_base + 1) % packets_per_window;
                 if (PRINT_BUFFER_STATUS)
                     printPacketArray(packet_buffer, packets_per_window);
@@ -182,7 +181,7 @@ int main(int argc, char *argv[])
 
             // after successful in order write, we want to write out any
             // data packets waiting in the buffer
-            while (packet_buffer[buffer_base].sequence == ftell(fp) && 
+            while (packet_buffer[buffer_base].sequence == (ftell(fp) % MAX_SEQUENCE_NUMBER) && 
                 packet_buffer[buffer_base].type != PLACE_HOLDER_TYPE)
             {
                 error_flag = fwrite(packet_buffer[buffer_base].data,packet_buffer[buffer_base].data_size,1,fp);
@@ -204,7 +203,7 @@ int main(int argc, char *argv[])
                     packet_buffer[buffer_base].type = PLACE_HOLDER_TYPE;
                     // calculating the index right before the buffer_base, accounting for edge case of base being 0 
                     buffer_tail = buffer_base == 0 ? packets_per_window - 1 : buffer_base - 1;
-                    packet_buffer[buffer_base].sequence = packet_buffer[buffer_tail].sequence + PACKET_DATA_SIZE;
+                    packet_buffer[buffer_base].sequence = (packet_buffer[buffer_tail].sequence + PACKET_DATA_SIZE) % MAX_SEQUENCE_NUMBER;
                     buffer_base = (buffer_base + 1) % packets_per_window;
                     if (PRINT_BUFFER_STATUS)
                         printPacketArray(packet_buffer, packets_per_window);
