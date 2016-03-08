@@ -180,6 +180,7 @@ int main(int argc, char *argv[])
                 // printf("written_data_size: %ld\n", written_data_size);
                 if (written_data_size == expected_data_size){
                     printf("%2d) Full filesize received: %ld\n", execution_no++, written_data_size);
+                    // printf("received packet sequence before send ack: %ld\n", received_pkt.sequence);
                     goto send_ack;
                 }
                 // after writing from buffer, update location written from to be an implied buffer tail 
@@ -216,8 +217,7 @@ int main(int argc, char *argv[])
                     // printf("written_data_size: %ld\n", written_data_size);
                     if (written_data_size == expected_data_size){
                         printf("%2d) Full filesize received: %ld\n", execution_no++, written_data_size);
-                        received_pkt = packet_buffer[buffer_base];
-                        goto send_ack;
+                        break;
                     }
                     packet_buffer[buffer_base].type = PLACE_HOLDER_TYPE;
                     // calculating the index right before the buffer_base, accounting for edge case of base being 0 
@@ -254,6 +254,7 @@ int main(int argc, char *argv[])
         send_ack:
             ack_pkt.sequence = received_pkt.sequence;
             ack_pkt.data_size = received_pkt.data_size;
+            // printf("in send_ack\n");
             if(sendto(socketfd, &ack_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen) < 0)
             {
                 printf("ERROR writing to acknowledgement socket");
