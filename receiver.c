@@ -231,13 +231,15 @@ int main(int argc, char *argv[])
         //send acknowledgement packet
         send_ack:
             ack_pkt.sequence = received_pkt.sequence;
+            ack_pkt.data_size = received_pkt.data_size;
             if(sendto(socketfd, &ack_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen) < 0)
             {
                 printf("ERROR writing to acknowledgement socket");
                 continue;
             }
             else {
-                printf("%2d) Sent ACK packet, Sequence: %ld\n", execution_no++, ack_pkt.sequence);
+                printf("%2d) Sent ACK packet, Sequence: %ld, Data size: %d\n", 
+                    execution_no++, ack_pkt.sequence, ack_pkt.data_size);
             }
         //if the packet isn't expected, don't send ACK
         no_ack:

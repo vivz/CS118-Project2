@@ -33,6 +33,8 @@ int main(int argc, char *argv[])
   struct packet window_pkt;
   window_pkt.type = WINDOW_SIZE_TYPE;
 
+  long acknowledged_sent_size = 0;
+
   socklen_t receiver_addr_len = sizeof(receiver_addr);
 
   FILE *file_p;
