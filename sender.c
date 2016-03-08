@@ -118,12 +118,35 @@ int main(int argc, char *argv[])
               break;
           }
       }
+
+      // /* Comment out if doing out of order testing
+      for (i = 0; i < packets_per_window; i++)
+      {
+        //TODO: update send_base and send_tail
+        if (sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
+        {
+            printf("Error writing to socket\n");
+            break;
+        }
+        else 
+        {
+            if(packet_array[i].type == END_TYPE)
+            {
+              printf("%2d) Sent END packet.\n", execution_no++);
+              break;
+            }
+            printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
+            if (PRINT_DATA)
+              printf("Data: \n%s\n", packet_array[i].data);
+        }
+      }
+      // */
+      /*
       // testing out of order sending
       int j = 0; 
       int num_array[20]={0,1,3,4,5,6,2,7,8,9,10,11,12,13,14,15,16,17,18,19};
       for( j = 0; j< packets_per_window; j++)
 
-      // for (i = 0; i < packets_per_window; i++)
       {
         //TODO: update send_base and send_tail
         // order: 0,2,3,4,5,6,2,7,8,9,10...
@@ -145,6 +168,7 @@ int main(int argc, char *argv[])
               printf("Data: \n%s\n", packet_array[i].data);
         }
       }
+      */
 
     }  //end of if (received_pkt.type == FILENAME_TYPE)
     else {
