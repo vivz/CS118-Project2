@@ -113,6 +113,7 @@ int main(int argc, char *argv[])
         printf("%2d) Received WINDOW_SIZE packet, Window Size: %d\n", execution_no++, window_size);
         //initializing packet buffer array
         packets_per_window = (window_size * 1024) / sizeof(struct packet);
+        printf("packets per window: %d\n", packets_per_window);
         packet_buffer = (struct packet*) malloc(packets_per_window * sizeof(struct packet));
         for(i = 0; i < packets_per_window; i++)
         {
@@ -124,7 +125,8 @@ int main(int argc, char *argv[])
 
       else if (received_pkt.type == DATA_TYPE) {
 
-        if (fp == NULL) {
+        if (fp == NULL) 
+        {
             char* new_filename = strcat(filename, "_copy");
             fp = fopen(new_filename, "wb");
             printf("%2d) Created %s\n", execution_no++, new_filename);
@@ -145,9 +147,31 @@ int main(int argc, char *argv[])
                 printf("Error writing to the file\n");
                 continue;
             }
-            else {
+            else 
+            {
                 printf("%2d) Wrote DATA packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
+                // printf("before update\n");
+                // printPacketArray(packet_buffer, packets_per_window);
+                packet_buffer[buffer_base].type = PLACE_HOLDER_TYPE;
+                if (buffer_base == 0) 
+                {
+                    packet_buffer[buffer_base].sequence = packet_buffer[packets_per_window - 1].sequence + PACKET_DATA_SIZE;
+                } 
+                else 
+                {
+                    packet_buffer[buffer_base].sequence = packet_buffer[buffer_base-1].sequence + PACKET_DATA_SIZE;
+                }
+                if (buffer_base == packets_per_window)
+                    buffer_base = 0;
+                else 
+                {
+                    buffer_base++;
+                }
+                // printf("after update\n");
+                // printPacketArray(packet_buffer, packets_per_window);
+
             }
+            /*
             end = 0;
             //go through the buffer 
             for(i = 0; i != packets_per_window; i++)
@@ -166,7 +190,7 @@ int main(int argc, char *argv[])
                     //TODO: wrap around sequence number when it exceeds
                     //fill the next expected spot with a place-holder 
                     printf("before update\n");
-                    printPacketArray(packet_buffer, 19);
+                    printPacketArray(packet_buffer, packets_per_window);
                     packet_buffer[i].type = PLACE_HOLDER_TYPE;
                     if(i!= 0) {
                         packet_buffer[i].sequence = packet_buffer[i-1].sequence + PACKET_DATA_SIZE;
@@ -184,12 +208,13 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
+            */
         }
         //if it's out of order, put it in the buffer
         else
         {
             printf("before update\n");
-            printPacketArray(packet_buffer, 19);
+            printPacketArray(packet_buffer, packets_per_window);
             printf("this packet is out of order\n");
             for(i = 0; i != packets_per_window; i++)
             {
