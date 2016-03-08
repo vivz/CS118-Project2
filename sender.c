@@ -125,6 +125,7 @@ int main(int argc, char *argv[])
           packet_array[i].data_size = fread(packet_array[i].data, 1, PACKET_DATA_SIZE, file_p);
       		last_packet_index = i;
 
+      		// case where file is smaller than initial window
           if (feof(file_p))
           {
           		break;
@@ -223,6 +224,30 @@ int main(int argc, char *argv[])
         printPacketArray(packet_array, packets_per_window);
 
     } // end of ACK_TYPE case
+
+    else if (received_pkt.type == RETRANSMISSION_TYPE)
+    {
+    	long retransmit_seq = received_pkt.sequence;
+    	int offset = (retransmit_seq - packet_array[send_base].sequence) % MAX_SEQUENCE_NUMBER;
+    	int requested_index = (send_base + offset) % packets_per_window;
+    	if (packet_array[requested_index].sequence == received_pkt.sequence)
+    	{
+    		printf("Test: if my math is right this should work\n");
+        if (sendto(socketfd, &packet_array[requested_index], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
+        {
+        	printf("Error resending packet\n");
+        }
+        else 
+        {
+          printf("%2d) (Re)Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[send_base].sequence);
+        }
+
+    	}
+    	else 
+    	{
+    		printf("math is not right :/\n");
+    	}
+    }
     else 
     {
       printf("%2d) received a packet\n", execution_no++);
