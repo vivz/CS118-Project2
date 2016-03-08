@@ -3,8 +3,8 @@ window_size = 5
 p_loss = 0.0
 p_corrupt = 0.0
 host = "localhost"
-filename = "large.txt"
-
+filename = "small.txt"
+cwd = $(shell pwd)
 sender_args = $(portnum) $(window_size) $(p_loss) $(p_corrupt)
 receiver_args = $(host) $(portnum) $(filename) $(p_loss) $(p_corrupt)
 
@@ -28,7 +28,14 @@ rs:
 rr:
 	make runreceiver
 
+test:
+	echo "#!/bin/sh\ncd $(cwd)\nmake rr\nzsh" > sender.sh 
+	open -a Terminal.app sender.sh
+	chmod +x sender.sh
+	make rs
+
 clean:
 	rm sender
 	rm receiver
 	rm *_copy
+	rm sender.sh
