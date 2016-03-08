@@ -24,6 +24,8 @@ void printPacket(struct packet p)
         packet_type = "FILENAME";
     else if (p.type == ACK_TYPE)
         packet_type = "ACK";
+    else if (p.type == DATA_TYPE)
+        packet_type = "DATA";
     else if (p.type == END_TYPE)
         packet_type = "END";
     else if (p.type == WINDOW_SIZE_TYPE)
@@ -32,7 +34,9 @@ void printPacket(struct packet p)
         packet_type = "PLACE_HOLDER";
     else
         packet_type = "UNKNOWN";
-    printf("Packet type: %s, Sequence:%ld, Data Size: %d, Data: \n%s\n", packet_type, p.sequence, p.data_size, p.data);
+    printf("Packet type: %s, Sequence:%ld, Data Size: %d\n", packet_type, p.sequence, p.data_size);
+    if (PRINT_DATA)
+        printf("Data: \n%s\n", p.data);
 }
 
 void printPacketArray(struct packet pa[], int size)
