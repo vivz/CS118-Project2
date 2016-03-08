@@ -45,6 +45,8 @@ int main(int argc, char *argv[])
     
 
     long expected_data_size, written_data_size = 0;
+    long last_written_sequence;
+
     if (argc < 6) {
        fprintf(stderr,"usage: %s <hostname> <port> <filename> <p(loss)> <p(corruption)>\n", argv[0]);
        exit(1);
@@ -160,6 +162,7 @@ int main(int argc, char *argv[])
             {
                 printf("%2d) Wrote DATA packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
                 written_data_size += received_pkt.data_size;
+                last_written_sequence = received_pkt.sequence;
                 // printf("written_data_size: %ld\n", written_data_size);
                 if (written_data_size == expected_data_size){
                     printf("%2d) Full filesize received: %ld\n", execution_no++, written_data_size);
@@ -181,7 +184,9 @@ int main(int argc, char *argv[])
 
             // after successful in order write, we want to write out any
             // data packets waiting in the buffer
-            while (packet_buffer[buffer_base].sequence == (ftell(fp) % MAX_SEQUENCE_NUMBER) && 
+
+            // don't think this first boolean check is quite correct
+            while (packet_buffer[buffer_base].sequence == last_written_sequence + PACKET_DATA_SIZE && 
                 packet_buffer[buffer_base].type != PLACE_HOLDER_TYPE)
             {
                 error_flag = fwrite(packet_buffer[buffer_base].data,packet_buffer[buffer_base].data_size,1,fp);
@@ -193,7 +198,8 @@ int main(int argc, char *argv[])
                 else
                 {
                     printf("%2d) Wrote DATA packet from the buffer, Sequence: %ld\n", execution_no++, packet_buffer[buffer_base].sequence);
-                    written_data_size += received_pkt.data_size;
+                    written_data_size += packet_buffer[buffer_base].data_size;
+                    last_written_sequence = packet_buffer[buffer_base].sequence;
                     // printf("written_data_size: %ld\n", written_data_size);
                     if (written_data_size == expected_data_size){
                         printf("%2d) Full filesize received: %ld\n", execution_no++, written_data_size);
