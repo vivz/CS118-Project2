@@ -136,19 +136,21 @@ int main(int argc, char *argv[])
       }
 
       else if (received_pkt.type == DATA_TYPE) {
+        
+        // Corruption
+        float random_prob = (rand() % 10000) / 10000.0;
+        if (random_prob < p_corrupt) {
+            goto send_retransmission;
+        }
+        
+
+
 
         if (fp == NULL) 
         {
             char* new_filename = strcat(filename, "_copy");
             fp = fopen(new_filename, "wb");
             printf("%2d) Created %s\n", execution_no++, new_filename);
-        }
-
-        // Corruption
-        float random_prob = (rand() % 10000) / 10000.0;
-        if (random_prob < p_corrupt) {
-            
-            goto send_retransmission;
         }
 
         printf("%2d) Received DATA packet, Size: %d, Sequence: %ld\n", 
@@ -243,6 +245,8 @@ int main(int argc, char *argv[])
                 }
             }
             //if this packet isn't expected, we just drop it   
+            printf("%2d) Received packet (Sequence: %ld) not in window range, dropping\n", 
+                execution_no++, received_pkt.sequence);
             goto no_ack;
         }
 
@@ -263,9 +267,7 @@ int main(int argc, char *argv[])
             }
         //if the packet isn't expected, don't send ACK
         no_ack:
-            printf("%2d) Received packet (Sequence: %ld) not in window range, dropping\n", 
-                execution_no++, received_pkt.sequence);
-            break;
+            continue;
 
         send_retransmission:
             printf("%2d) Received DATA packet, Size: %d, Sequence: %ld, Corrupted\n", 
@@ -273,7 +275,7 @@ int main(int argc, char *argv[])
             struct packet retransmission_pkt;
             retransmission_pkt.type = RETRANSMISSION_TYPE;
             retransmission_pkt.sequence = received_pkt.sequence;
-            break;
+            continue;
 
       } //end of else if (received_pkt.type == DATA_TYPE)
      
