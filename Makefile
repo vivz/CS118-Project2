@@ -3,7 +3,7 @@ window_size = 5
 p_loss = 0.0
 p_corrupt = 0.0
 host = "localhost"
-filename = "small.txt"
+filename = "large.txt"
 
 sender_args = $(portnum) $(window_size) $(p_loss) $(p_corrupt)
 receiver_args = $(host) $(portnum) $(filename) $(p_loss) $(p_corrupt)

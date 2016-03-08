@@ -28,7 +28,8 @@ int main(int argc, char *argv[])
     int receive_length;
     int execution_no = 0;
     int buffer_full = 0, i = 0, end = 0;
-    int window_size, packets_per_window;
+    int packets_per_window;
+    int window_size;
     char *filename, *hostname;
     double p_loss, p_corrupt;
     struct sockaddr_in sender_addr;
