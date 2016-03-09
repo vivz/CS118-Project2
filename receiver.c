@@ -138,13 +138,17 @@ int main(int argc, char *argv[])
       else if (received_pkt.type == DATA_TYPE) {
         
         // Corruption
-        float random_prob = (rand() % 10000) / 10000.0;
-        if (random_prob < p_corrupt) {
+        float random_prob1 = (rand() % 10000) / 10000.0;
+        if (random_prob1 < p_corrupt) {
             goto send_retransmission;
         }
         
-
-
+        float random_prob2 = (rand() % 10000) / 10000.0;
+        if (random_prob2 < p_loss) {
+            printf("%2d) Received DATA packet, Size: %d, Sequence: %ld, Lost - Dropping packet\n", 
+                execution_no++, received_pkt.data_size, received_pkt.sequence);
+            continue;
+        }
 
         if (fp == NULL) 
         {

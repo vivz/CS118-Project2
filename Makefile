@@ -1,6 +1,6 @@
 portnum = 14000
 window_size = 5
-p_loss = 0.0
+p_loss = 0.5
 p_corrupt = 0.0
 host = "localhost"
 filename = small.txt
