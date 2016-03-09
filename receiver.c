@@ -265,8 +265,8 @@ int main(int argc, char *argv[])
                 continue;
             }
             else {
-                printf("%2d) Sent ACK packet, Sequence: %ld, Data size: %d\n", 
-                    execution_no++, ack_pkt.sequence, ack_pkt.data_size);
+                printf("%2d) Sent ACK packet, Sequence: %ld\n", 
+                    execution_no++, ack_pkt.sequence);
                 if (written_data_size == expected_data_size)
                     break;
             }
@@ -275,8 +275,8 @@ int main(int argc, char *argv[])
             continue;
 
         send_retransmission:
-            printf("%2d) Received DATA packet, Size: %d, Sequence: %ld, Corrupted\n", 
-                execution_no++, received_pkt.data_size, received_pkt.sequence);
+            printf("%2d) Received DATA packet, Sequence: %ld, Corrupted\n", 
+                execution_no++, received_pkt.sequence);
             struct packet retransmission_pkt;
             retransmission_pkt.type = RETRANSMISSION_TYPE;
             retransmission_pkt.sequence = received_pkt.sequence;

@@ -191,8 +191,8 @@ int main(int argc, char *argv[])
           continue;
       }
 
-      printf("%2d) Received ACK packet, Sequence: %ld, Data size: %d\n", 
-        execution_no++, received_pkt.sequence, received_pkt.data_size);
+      printf("%2d) Received ACK packet, Sequence: %ld,\n", 
+        execution_no++, received_pkt.sequence);
 
       acknowledged_sent_size += received_pkt.data_size;
       // printf("acknowledged file size: %ld\n", acknowledged_sent_size);
