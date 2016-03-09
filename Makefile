@@ -2,7 +2,7 @@ portnum = 14000
 window_size = 20
 p_loss_sender = 0.0
 p_corrupt_sender = 0.0
-p_loss_receiver = 0.1
+p_loss_receiver = 0.7
 p_corrupt_receiver = 0.1
 
 host = "localhost"
@@ -23,8 +23,8 @@ endif
 
 
 all:
-	gcc -w -o sender -g sender.c
-	gcc -w -o receiver -g receiver.c
+	gcc -w -o sender sender.c
+	gcc -w -o receiver receiver.c
 
 warning:
 	gcc -o sender sender.c
