@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <signal.h> /* signal name macros, and the kill() prototype */
+#include <sys/fcntl.h>
 
 #include "common.h"
 
@@ -57,6 +58,7 @@ int main(int argc, char *argv[])
   socketfd = socket(AF_INET, SOCK_DGRAM, 0); 
   if (socketfd < 0) 
     error("Error: opening socket failed");
+  fcntl(socketfd, F_SETFL, O_NONBLOCK);
   
   //reset memory
   memset((char *) &sender_addr, 0, sizeof(sender_addr));    
@@ -88,31 +90,15 @@ int main(int argc, char *argv[])
   }
   while (1) 
   {
-  	time(&current_time);
-  	for (i = 0; i < packets_per_window; i++) 
-  	{
-  		if ((current_time - timestamps[i]) > TIMEOUT)
-  		{
-        if (sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
-        {
-            printf("Error writing to socket\n");
-            break;
-        }
-        else 
-        {
-        		timestamps[i] = time();
-            printf("%2d) Timeout. Re-sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
-            if (PRINT_DATA)
-              printf("Data: \n%s\n", packet_array[i].data);
-        }
-  		}
-  	}
-
+  	loop:
     //receiving a packet
     receive_length = recvfrom(socketfd, &received_pkt, 
       sizeof(received_pkt), 
       0, (struct sockaddr *)&receiver_addr, 
       &receiver_addr_len);
+
+    if (receive_length < 0)
+    	goto timer;
 
     //begining of a file transmission
     if (received_pkt.type == FILENAME_TYPE) 
@@ -197,7 +183,7 @@ int main(int argc, char *argv[])
       if (acknowledged_sent_size == filesize) 
       {
       	printf("%2d) Full file size acknowledged: %ld\n", execution_no++, filesize);
-      	break;
+      	exit(0);
       }
 
       // if ACK is for the base, read into new base, send that, move base forward
@@ -207,7 +193,14 @@ int main(int argc, char *argv[])
       		 		 packet_array[send_base].type == ACK_TYPE)
 	      {
 	      	if (feof(file_p))
+	      	{
+	      		packet_array[send_base].type = ACK_TYPE;
+	      		// for (i = 0; i < packets_per_window; i++) 
+	      		// {
+	      		// 	packet_array[i].type = ACK_TYPE;
+	      		// }
 	      		break;
+	      	}
 	      	packet_array[send_base].type = DATA_TYPE;
 	        packet_array[send_base].sequence = ftell(file_p) % MAX_SEQUENCE_NUMBER;
 	        packet_array[send_base].data_size = fread(packet_array[send_base].data, 1, PACKET_DATA_SIZE, file_p);
@@ -278,6 +271,27 @@ int main(int argc, char *argv[])
 
   } // end while
 
-  return 0; 
+  timer:
+  	time(&current_time);
+  	for (i = 0; i < packets_per_window; i++) 
+  	{
+  		if ((current_time - timestamps[i]) > TIMEOUT && packet_array[i].type == DATA_TYPE)
+  		{
+        if (sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
+        {
+            printf("Error writing to socket\n");
+            break;
+        }
+        else 
+        {
+        		timestamps[i] = time(NULL);
+            printf("%2d) Timeout. Re-sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
+            if (PRINT_DATA)
+              printf("Data: \n%s\n", packet_array[i].data);
+        }
+  		}
+  	}
+  	goto loop;
+
 }
 

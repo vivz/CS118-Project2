@@ -1,5 +1,5 @@
 #define PACKET_DATA_SIZE 512
-#define FILENAME_TYPE 0
+#define FILENAME_TYPE 7
 #define ACK_TYPE 1
 #define DATA_TYPE 2
 #define END_TYPE 3
@@ -13,7 +13,7 @@
 
 #define MAX_SEQUENCE_NUMBER 30720
 
-#define TIMEOUT 1
+#define TIMEOUT 0.5
 
 struct packet
 {
