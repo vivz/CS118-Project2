@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
   int socketfd, newsocketfd, portno, pid, window_size;
   int receive_length;
   int send_base = 0, send_tail;
-  int i = 0, n = 0;
+  int i = 0, n = 0, j;
   int last_packet_index = 0;
   int execution_no = 0;
   double p_loss, p_corrupt;
@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
   struct packet packet_array[packets_per_window];
   window_pkt.data_size = window_size;
   send_tail = packets_per_window - 1;
+  printf("packets_per_window: %d\n", packets_per_window);
   time_t timestamps[packets_per_window];
   time_t current_time;
 	time(&current_time);
@@ -161,6 +162,7 @@ int main(int argc, char *argv[])
           }
       }
 
+      printf("last_packet_index: %d\n", last_packet_index);
       // /* Comment out if doing out of order testing
       // initial sending of packets
 
@@ -169,8 +171,7 @@ int main(int argc, char *argv[])
 
       for (i = 0; i <= last_packet_index; i++)
       {
-        //TODO: update send_base and send_tail
-
+      	printf("index %d\n", i);
         if (sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
         {
             printf("Error writing to socket\n");
@@ -180,8 +181,16 @@ int main(int argc, char *argv[])
         {
             printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
             if (PRINT_DATA)
+            {
               printf("Data: \n%s\n", packet_array[i].data);
-        		timestamps[i] = time();
+            }
+            printf("heeyyy\n");
+  		      printf("index %d\n", i);
+  		  		// for (j = 0; j < packets_per_window; j++)
+						// {
+						// 	printf("%d) time: %ld\n", j, timestamps[j]);
+						// }
+						timestamps[i];
         }
       }
     }  //end of if (received_pkt.type == FILENAME_TYPE)
