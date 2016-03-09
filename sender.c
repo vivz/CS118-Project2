@@ -213,6 +213,8 @@ int main(int argc, char *argv[])
       	while (received_pkt.sequence == packet_array[send_base].sequence ||
       		 		 packet_array[send_base].type == ACK_TYPE)
 	      {
+	      	if (feof(file_p))
+	      		break;
 	      	packet_array[send_base].type = DATA_TYPE;
 	        packet_array[send_base].sequence = ftell(file_p) % MAX_SEQUENCE_NUMBER;
 	        packet_array[send_base].data_size = fread(packet_array[send_base].data, 1, PACKET_DATA_SIZE, file_p);
@@ -238,7 +240,6 @@ int main(int argc, char *argv[])
       {
 
       	// printf("Received ACK not base, Sequence: %ld\n", received_pkt.sequence);
-
       	for (i = (send_base + 1) % packets_per_window; i != send_base; i = (i + 1) % packets_per_window)
       	{
       		// printf("looped sequence: %ld\n", packet_array[i].sequence);
