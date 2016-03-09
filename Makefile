@@ -1,7 +1,7 @@
 portnum = 14000
 window_size = 20
-p_loss_sender = 0.1
-p_corrupt_sender = 0.1
+p_loss_sender = 0.0
+p_corrupt_sender = 0.0
 p_loss_receiver = 0.1
 p_corrupt_receiver = 0.1
 
@@ -10,6 +10,17 @@ filename = small.txt
 cwd = $(shell pwd)
 sender_args = $(portnum) $(window_size) $(p_loss_sender) $(p_corrupt_sender)
 receiver_args = $(host) $(portnum) $(filename) $(p_loss_receiver) $(p_corrupt_receiver)
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+    TERMINALCOMMAND = gnome-terminal -e "bash sender.sh"
+    SHELL = bash
+endif
+ifeq ($(UNAME_S),Darwin)
+    TERMINALCOMMAND = open -a Terminal.app sender.sh
+    SHELL = zsh
+endif
+
 
 all:
 	gcc -w -o sender -g sender.c
@@ -33,8 +44,9 @@ rr:
 
 test:
 	make
-	echo "#!/bin/sh\ncd $(cwd)\nmake rr\nzsh" > sender.sh 
-	open -a Terminal.app sender.sh
+	echo "#!/bin/sh\ncd $(cwd)\nmake rr\n$(SHELL)" > sender.sh 
+	#open -a Terminal.app sender.sh
+	$(TERMINALCOMMAND)
 	chmod +x sender.sh
 	make rs
 	diff $(filename) $(addsuffix _copy, $(filename))
