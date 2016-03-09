@@ -76,7 +76,6 @@ int main(int argc, char *argv[])
   struct packet packet_array[packets_per_window];
   window_pkt.data_size = window_size;
   send_tail = packets_per_window - 1;
-  printf("packets_per_window: %d\n", packets_per_window);
   time_t timestamps[packets_per_window];
   time_t current_time;
 	time(&current_time);
@@ -148,7 +147,7 @@ int main(int argc, char *argv[])
       }
 
       //Initialize the first packet array
-      for (i=0; i<packets_per_window; i++)
+      for (i = 0; i < packets_per_window; i++)
       {
           packet_array[i].type = DATA_TYPE;
           packet_array[i].sequence = ftell(file_p) % MAX_SEQUENCE_NUMBER;
@@ -171,7 +170,6 @@ int main(int argc, char *argv[])
 
       for (i = 0; i <= last_packet_index; i++)
       {
-      	printf("index %d\n", i);
         if (sendto(socketfd, &packet_array[i], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
         {
             printf("Error writing to socket\n");
@@ -179,18 +177,13 @@ int main(int argc, char *argv[])
         }
         else 
         {
-            printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
+            timestamps[i] = time(NULL);
+            printf("%2d) Sent DATA packet, Sequence: %ld, Timestamp: %ld\n", 
+            	execution_no++, packet_array[i].sequence, timestamps[i]);
             if (PRINT_DATA)
             {
               printf("Data: \n%s\n", packet_array[i].data);
             }
-            printf("heeyyy\n");
-  		      printf("index %d\n", i);
-  		  		// for (j = 0; j < packets_per_window; j++)
-						// {
-						// 	printf("%d) time: %ld\n", j, timestamps[j]);
-						// }
-						timestamps[i];
         }
       }
     }  //end of if (received_pkt.type == FILENAME_TYPE)
@@ -227,10 +220,11 @@ int main(int argc, char *argv[])
 	        }
 	        else 
 	        {
-	          printf("%2d) Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[send_base].sequence);
+            timestamps[send_base] = time(NULL);
+            printf("%2d) Sent DATA packet, Sequence: %ld, Timestamp: %ld\n", 
+            	execution_no++, packet_array[send_base].sequence, timestamps[send_base]);
 	          if (PRINT_DATA)
 	            printf("Data: \n%s\n", packet_array[send_base].data);
-	        	timestamps[send_base] = time();
 	          send_base = (send_base + 1) % packets_per_window;
 	        }
 	      }
@@ -238,14 +232,11 @@ int main(int argc, char *argv[])
       // ACK is not the base
       else 
       {
-
-      	// printf("Received ACK not base, Sequence: %ld\n", received_pkt.sequence);
+      	// find the packet in the send window that was ack'd, then set it to ACK
       	for (i = (send_base + 1) % packets_per_window; i != send_base; i = (i + 1) % packets_per_window)
       	{
-      		// printf("looped sequence: %ld\n", packet_array[i].sequence);
       		if (packet_array[i].sequence == received_pkt.sequence)
       		{
-      			// printf("ACK not base set\n");
       			packet_array[i] = received_pkt;
       			break;
       		}
@@ -272,32 +263,13 @@ int main(int argc, char *argv[])
 	        }
 	        else 
 	        {
-	          printf("%2d) (Re)Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[i].sequence);
-	        	timestamps[i] = time();
+            timestamps[i] = time(NULL);
+            printf("%2d) Re-sent DATA packet, Sequence: %ld, Timestamp: %ld\n", 
+            	execution_no++, packet_array[i].sequence, timestamps[i]);
 	        }
 
       	}
       }
-    	// long retransmit_seq = received_pkt.sequence;
-    	// int offset = (retransmit_seq - packet_array[send_base].sequence) % MAX_SEQUENCE_NUMBER;
-    	// int requested_index = (send_base + offset) % packets_per_window;
-    	// if (packet_array[requested_index].sequence == received_pkt.sequence)
-    	// {
-    	// 	printf("Test: if my math is right this should work\n");
-     //    if (sendto(socketfd, &packet_array[requested_index], sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
-     //    {
-     //    	printf("Error resending packet\n");
-     //    }
-     //    else 
-     //    {
-     //      printf("%2d) (Re)Sent DATA packet, Sequence: %ld\n", execution_no++, packet_array[send_base].sequence);
-     //    }
-
-    	// }
-    	// else 
-    	// {
-    	// 	printf("math is not right :/\n");
-    	// }
     }
     else 
     {
