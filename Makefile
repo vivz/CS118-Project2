@@ -44,8 +44,7 @@ rr:
 
 test:
 	make
-	echo "#!/bin/sh\ncd $(cwd)\nmake rr\n$(SHELL)" > sender.sh 
-	#open -a Terminal.app sender.sh
+	echo -e "#!/bin/sh\ncd $(cwd)\nmake rr\n$(SHELL)" > sender.sh 
 	$(TERMINALCOMMAND)
 	chmod +x sender.sh
 	make rs
