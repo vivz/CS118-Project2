@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     error("Error: bind failed");
 
   printf("Waiting on port %d\n", portno);
-
+  printf("Packet size: %d\n", sizeof(struct packet));
   //constructing the packets
   int packets_per_window = (window_size * 1024) / sizeof(struct packet);
   struct packet packet_array[packets_per_window];
@@ -86,7 +86,6 @@ int main(int argc, char *argv[])
   {
   	// initializing times to a year from now
   	timestamps[i] = current_time + 365 * 24 * 60 * 60;
-  	printf("timestamp at index %d: %ld\n", i, timestamps[i]);
   }
   while (1) 
   {
@@ -100,6 +99,9 @@ int main(int argc, char *argv[])
     if (receive_length < 0)
     	goto timer;
 
+    if (received_pkt.type == RETRANSMISSION_TYPE || received_pkt.type == ACK_TYPE)
+    {
+    }
     //begining of a file transmission
     if (received_pkt.type == FILENAME_TYPE) 
     {
@@ -175,6 +177,20 @@ int main(int argc, char *argv[])
     }  //end of if (received_pkt.type == FILENAME_TYPE)
     else if (received_pkt.type == ACK_TYPE) 
     {
+      float random_prob1 = (rand() % 10000) / 10000.0;
+      if (random_prob1 < p_corrupt) {
+          printf("%2d) Received ACK packet, Sequence: %ld, Corrupted\n", 
+              execution_no++, received_pkt.sequence);
+          continue;
+      }
+      
+      float random_prob2 = (rand() % 10000) / 10000.0;
+      if (random_prob2 < p_loss) {
+          printf("%2d) Received ACK packet, Sequence: %ld, Lost - Dropping packet\n", 
+              execution_no++, received_pkt.sequence);
+          continue;
+      }
+
       printf("%2d) Received ACK packet, Sequence: %ld, Data size: %d\n", 
         execution_no++, received_pkt.sequence, received_pkt.data_size);
 
@@ -242,6 +258,20 @@ int main(int argc, char *argv[])
 
     else if (received_pkt.type == RETRANSMISSION_TYPE)
     {
+      float random_prob1 = (rand() % 10000) / 10000.0;
+      if (random_prob1 < p_corrupt) {
+          printf("%2d) Received RETRANSMISSION packet, Sequence: %ld, Corrupted\n", 
+              execution_no++, received_pkt.sequence);
+          continue;
+      }
+      
+      float random_prob2 = (rand() % 10000) / 10000.0;
+      if (random_prob2 < p_loss) {
+          printf("%2d) Received RETRANSMISSION packet, Sequence: %ld, Lost - Dropping packet\n", 
+              execution_no++, received_pkt.sequence);
+          continue;
+      }
+
       printf("%2d) Received RETRANSMISSION packet, Sequence: %ld\n", 
         execution_no++, received_pkt.sequence);
 
