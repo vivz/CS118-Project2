@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
   int last_packet_index = 0;
   int execution_no = 0;
   double p_loss, p_corrupt;
+  double percent_acknowledged;
   struct sockaddr_in sender_addr, receiver_addr;
   struct packet received_pkt;
   struct packet window_pkt;
@@ -192,10 +193,11 @@ int main(int argc, char *argv[])
           continue;
       }
 
-      printf("%2d) Received ACK packet, Sequence: %ld,\n", 
-        execution_no++, received_pkt.sequence);
-
       acknowledged_sent_size += received_pkt.data_size;
+      percent_acknowledged = 100.0 * acknowledged_sent_size / filesize;
+      printf("%2d) Received ACK packet, Sequence: %ld, Percent transferred: %.2f%%\n", 
+        execution_no++, received_pkt.sequence, percent_acknowledged);
+
       // printf("acknowledged file size: %ld\n", acknowledged_sent_size);
       if (acknowledged_sent_size == filesize) 
       {

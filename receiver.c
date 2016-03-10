@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
     int buffer_full = 0, i = 0, end = 0;
     int packets_per_window;
     int window_size;
+    double percent_complete;
     char *filename, *hostname;
     double p_loss, p_corrupt;
     struct sockaddr_in sender_addr;
@@ -182,8 +183,9 @@ int main(int argc, char *argv[])
             // writing was successful
             {
                 written_data_size += received_pkt.data_size;
-                printf("%2d) Wrote DATA packet, Sequence: %ld, Written Data Size: %.2f KB\n", 
-                    execution_no++, received_pkt.sequence, written_data_size / 1000.0);
+                percent_complete = 100.0 * written_data_size / expected_data_size;
+                printf("%2d) Wrote DATA packet, Sequence: %ld, Written Data Size: %.2f KB, Percent Complete: %.2f%%\n", 
+                    execution_no++, received_pkt.sequence, written_data_size / 1000.0, percent_complete);
                 last_written_sequence = received_pkt.sequence;
                 // printf("written_data_size: %ld\n", written_data_size);
                 if (written_data_size == expected_data_size){
@@ -220,8 +222,9 @@ int main(int argc, char *argv[])
                 else
                 {
                     written_data_size += packet_buffer[buffer_base].data_size;
-                    printf("%2d) Wrote DATA packet from the buffer, Sequence: %ld, Written Data Size: %.2f KB\n",
-                        execution_no++, packet_buffer[buffer_base].sequence, written_data_size / 1000.0);
+                    percent_complete = 100.0 * written_data_size / expected_data_size;
+                    printf("%2d) Wrote DATA packet from buffer, Sequence: %ld, Written Data Size: %.2f KB, Percent Complete: %.2f%%\n", 
+                        execution_no++, received_pkt.sequence, written_data_size / 1000.0, percent_complete);
                     last_written_sequence = packet_buffer[buffer_base].sequence;
                     // printf("written_data_size: %ld\n", written_data_size);
                     if (written_data_size == expected_data_size){
