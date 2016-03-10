@@ -25,6 +25,8 @@ int main(int argc, char *argv[])
 {
   int socketfd, newsocketfd, portno, pid, window_size;
   int receive_length;
+  int cwnd = 1;
+
   int send_base = 0, send_tail;
   int i = 0, n = 0, j;
   int last_packet_index = 0;
@@ -75,14 +77,15 @@ int main(int argc, char *argv[])
   printf("Packet size: %d\n", sizeof(struct packet));
   //constructing the packets
   int packets_per_window = (window_size * 1024) / sizeof(struct packet);
-  struct packet packet_array[packets_per_window];
+  //initial cwnd is 1
+  struct packet* packet_array = malloc(cwnd * sizeof(struct packet));
   window_pkt.data_size = window_size;
   send_tail = packets_per_window - 1;
-  time_t timestamps[packets_per_window];
+  time_t* timestamps = malloc(cwnd * sizeof(time_t));
   time_t current_time;
 	time(&current_time);
 
-  for (i = 0; i < packets_per_window; i++)
+  for (i = 0; i < cwnd; i++)
   {
   	// initializing times to a year from now
   	timestamps[i] = current_time + 365 * 24 * 60 * 60;
@@ -99,9 +102,6 @@ int main(int argc, char *argv[])
     if (receive_length < 0)
     	goto timer;
 
-    if (received_pkt.type == RETRANSMISSION_TYPE || received_pkt.type == ACK_TYPE)
-    {
-    }
     //begining of a file transmission
     if (received_pkt.type == FILENAME_TYPE) 
     {
@@ -117,13 +117,15 @@ int main(int argc, char *argv[])
       else {
         // send the size of the file as the sequence number in the window packet
         // janky, I know
+        // no Simon this is called being flexible
         fseek(file_p, 0, SEEK_END);
         filesize = ftell(file_p);
         rewind(file_p);
         window_pkt.sequence = filesize;
       }
 
-      // let the receiver know our window size
+      // let the receiver know our window size 
+      // I think we just leave it here 'cause the receiver's window size doesn't really matter to us
       if (sendto(socketfd, &window_pkt, sizeof(struct packet), 0, (struct sockaddr *)&receiver_addr, receiver_addr_len) < 0) 
       {
           printf("Error: sending window packet\n");
@@ -135,12 +137,13 @@ int main(int argc, char *argv[])
       }
 
       //Initialize the first packet array
-      for (i = 0; i < packets_per_window; i++)
+      for (i = 0; i < cwnd; i++)
       {
           packet_array[i].type = DATA_TYPE;
           packet_array[i].sequence = ftell(file_p) % MAX_SEQUENCE_NUMBER;
           packet_array[i].data_size = fread(packet_array[i].data, 1, PACKET_DATA_SIZE, file_p);
-      		last_packet_index = i;
+      		//doesn't really matter here anymore because cwnd starts with 1 anyways
+          last_packet_index = i;
 
       		// case where file is smaller than initial window
           if (feof(file_p))
@@ -149,7 +152,6 @@ int main(int argc, char *argv[])
           }
       }
 
-      printf("last_packet_index: %d\n", last_packet_index);
       // /* Comment out if doing out of order testing
       // initial sending of packets
 
@@ -175,6 +177,7 @@ int main(int argc, char *argv[])
         }
       }
     }  //end of if (received_pkt.type == FILENAME_TYPE)
+
     else if (received_pkt.type == ACK_TYPE) 
     {
       float random_prob1 = (rand() % 10000) / 10000.0;
