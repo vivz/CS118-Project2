@@ -11,6 +11,8 @@ cwd = $(shell pwd)
 sender_args = $(portnum) $(window_size) $(p_loss_sender) $(p_corrupt_sender)
 receiver_args = $(host) $(portnum) $(filename) $(p_loss_receiver) $(p_corrupt_receiver)
 
+submit_dir = project2_804347338_104281736
+
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
     TERMINALCOMMAND = gnome-terminal -e "bash sender.sh"
@@ -50,8 +52,19 @@ test:
 	make rs
 	diff $(filename) $(addsuffix _copy, $(filename))
 
+tar:
+	mkdir $(submit_dir)
+	cp common.h $(submit_dir)
+	cp sender.c $(submit_dir)
+	cp receiver.c $(submit_dir)
+	cp CS118Project2Report.pdf $(submit_dir)
+	cp Makefile $(submit_dir)
+	cp README.md $(submit_dir)
+	tar -cvf $(submit_dir).tar $(submit_dir)
+
 clean:
 	rm sender
 	rm receiver
 	rm *_copy
 	rm sender.sh
+	rm -rf $(submit_dir)
