@@ -2,11 +2,11 @@ portnum = 14000
 window_size = 10
 p_loss_sender = 0.0
 p_corrupt_sender = 0.0
-p_loss_receiver = 0.0
-p_corrupt_receiver = 0.0
+p_loss_receiver = 0.2
+p_corrupt_receiver = 0.1
 
 host = "localhost"
-filename = large.txt
+filename = small.txt
 cwd = $(shell pwd)
 sender_args = $(portnum) $(window_size) $(p_loss_sender) $(p_corrupt_sender)
 receiver_args = $(host) $(portnum) $(filename) $(p_loss_receiver) $(p_corrupt_receiver)

@@ -81,6 +81,7 @@ int main(int argc, char *argv[])
   time_t timestamps[packets_per_window];
   time_t current_time;
 	time(&current_time);
+	srand(time(NULL));
 
   for (i = 0; i < packets_per_window; i++)
   {
@@ -99,12 +100,11 @@ int main(int argc, char *argv[])
       &receiver_addr_len);
 
     if (receive_length < 0)
-    	goto timer;
+    	goto timeout_check;
 
     //begining of a file transmission
     if (received_pkt.type == FILENAME_TYPE) 
     {
-    	timer = clock();
       //find the file
       char* filename = received_pkt.data;
       printf("%2d) Received FILENAME packet, Filename: %s\n", execution_no++, filename);
@@ -133,6 +133,7 @@ int main(int argc, char *argv[])
           printf("%2d) Sent WINDOW_SIZE packet, Window Size: %d, Filesize: %ld, Packets per window: %d\n", 
           	execution_no++, window_size, filesize, packets_per_window);
       }
+    	timer = clock();
 
       //Initialize the first packet array
       for (i = 0; i < packets_per_window; i++)
@@ -149,7 +150,7 @@ int main(int argc, char *argv[])
           }
       }
 
-      printf("last_packet_index: %d\n", last_packet_index);
+      // printf("last_packet_index: %d\n", last_packet_index);
       // /* Comment out if doing out of order testing
       // initial sending of packets
 
@@ -302,7 +303,7 @@ int main(int argc, char *argv[])
 
   } // end while
 
-  timer:
+  timeout_check:
   	time(&current_time);
   	for (i = 0; i < packets_per_window; i++) 
   	{

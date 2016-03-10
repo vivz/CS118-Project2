@@ -89,6 +89,8 @@ int main(int argc, char *argv[])
     filename_pkt.data_size = strlen(filename); 
 
     clock_t timer;
+    srand(time(NULL));
+    
     // send the file name
     error_flag = sendto(socketfd, &filename_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen);
     if (error_flag < 0) 
