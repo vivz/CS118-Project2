@@ -87,6 +87,8 @@ int main(int argc, char *argv[])
   	// initializing times to a year from now
   	timestamps[i] = current_time + 365 * 24 * 60 * 60;
   }
+	clock_t timer;
+
   while (1) 
   {
   	loop:
@@ -99,12 +101,10 @@ int main(int argc, char *argv[])
     if (receive_length < 0)
     	goto timer;
 
-    if (received_pkt.type == RETRANSMISSION_TYPE || received_pkt.type == ACK_TYPE)
-    {
-    }
     //begining of a file transmission
     if (received_pkt.type == FILENAME_TYPE) 
     {
+    	timer = clock();
       //find the file
       char* filename = received_pkt.data;
       printf("%2d) Received FILENAME packet, Filename: %s\n", execution_no++, filename);
@@ -199,6 +199,7 @@ int main(int argc, char *argv[])
       if (acknowledged_sent_size == filesize) 
       {
       	printf("%2d) Full file size acknowledged: %ld\n", execution_no++, filesize);
+      	printf("Time elapsed: %ld\n", clock() - timer);
       	exit(0);
       }
 

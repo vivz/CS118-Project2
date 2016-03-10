@@ -88,14 +88,15 @@ int main(int argc, char *argv[])
     filename_pkt.type = FILENAME_TYPE;
     filename_pkt.data_size = strlen(filename); 
 
+    clock_t timer;
     // send the file name
     error_flag = sendto(socketfd, &filename_pkt, sizeof(struct packet), 0, (struct sockaddr *)&sender_addr, senderlen);
     if (error_flag < 0) 
         error("ERROR writing to filename socket");
     else {
+        timer = clock();
         printf("%2d) Sent FILENAME packet, Requested: %s\n", execution_no++, filename);
     }
-    
     while(1)
     {
       //receiving a packet
@@ -268,7 +269,10 @@ int main(int argc, char *argv[])
                 printf("%2d) Sent ACK packet, Sequence: %ld\n", 
                     execution_no++, ack_pkt.sequence);
                 if (written_data_size == expected_data_size)
+                {
+                    printf("Time elapsed: %ld\n", clock() - timer);
                     break;
+                }
             }
         //if the packet isn't expected, don't send ACK
         no_ack:
@@ -289,7 +293,10 @@ int main(int argc, char *argv[])
                 printf("%2d) Sent RETRANSMISSION packet, Sequence: %ld\n", 
                     execution_no++, retransmission_pkt.sequence);
                 if (written_data_size == expected_data_size)
+                {
+                    printf("Time elapsed: %ld\n", clock() - timer);
                     break;
+                }
             }
             continue;
 
