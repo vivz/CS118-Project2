@@ -252,9 +252,10 @@ int main(int argc, char *argv[])
                 }
             }
             //if this packet isn't expected, we just drop it   
-            printf("%2d) Received DATA packet (Sequence: %ld) not in window range, dropping\n", 
-                execution_no++, received_pkt.sequence);
-            goto no_ack;
+
+            // printf("%2d) Received DATA packet (Sequence: %ld) not in window range, dropping\n", 
+            //     execution_no++, received_pkt.sequence);
+            goto send_ack;
         }
 
         //send acknowledgement packet
