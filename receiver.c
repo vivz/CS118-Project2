@@ -181,8 +181,9 @@ int main(int argc, char *argv[])
             else 
             // writing was successful
             {
-                printf("%2d) Wrote DATA packet, Sequence: %ld\n", execution_no++, received_pkt.sequence);
                 written_data_size += received_pkt.data_size;
+                printf("%2d) Wrote DATA packet, Sequence: %ld, Written Data Size: %.2f KB\n", 
+                    execution_no++, received_pkt.sequence, written_data_size / 1000.0);
                 last_written_sequence = received_pkt.sequence;
                 // printf("written_data_size: %ld\n", written_data_size);
                 if (written_data_size == expected_data_size){
@@ -218,8 +219,9 @@ int main(int argc, char *argv[])
                 } 
                 else
                 {
-                    printf("%2d) Wrote DATA packet from the buffer, Sequence: %ld\n", execution_no++, packet_buffer[buffer_base].sequence);
                     written_data_size += packet_buffer[buffer_base].data_size;
+                    printf("%2d) Wrote DATA packet from the buffer, Sequence: %ld, Written Data Size: %.2f KB\n",
+                        execution_no++, packet_buffer[buffer_base].sequence, written_data_size / 1000.0);
                     last_written_sequence = packet_buffer[buffer_base].sequence;
                     // printf("written_data_size: %ld\n", written_data_size);
                     if (written_data_size == expected_data_size){
