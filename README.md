@@ -1,9 +1,8 @@
-# CS118-Project2
+# CS 118 Project 2 (Winter 2016)
 
-Send size in window packet - DONE
-Slide window on acknowledgements for sender - DONE
-Add max sequence number - DONE
+Group Number: 13
 
-Implement corruption, retransmission packets
-implement loss, timeouts
+Simon Zou - 804347338
+Ni Zhang - 104281736
 
+We paired programmed most of it. Ni implemented the handling of out of order packets and Simon implemented the timeout.
